@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.9
 import PackageDescription
 
 let package = Package(
@@ -7,8 +7,8 @@ let package = Package(
         .library(name: "AndroidOSLog", targets: ["AndroidOSLog"])
     ],
     targets: [
-        .target(name: "CAndroidLog"),
-        .target(name: "AndroidOSLog", dependencies: ["CAndroidLog"]),
-        .testTarget(name: "AndroidOSLogTests", dependencies: ["AndroidOSLog"])
+        .systemLibrary(name: "CAndroidLog"),
+        .target(name: "AndroidOSLog", dependencies: [.target(name: "CAndroidLog", condition: .when(platforms: [.android]))]),
+        .testTarget(name: "AndroidOSLogTests", dependencies: [.target(name: "AndroidOSLog")])
     ]
 )

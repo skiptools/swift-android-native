@@ -1,0 +1,4 @@
+module CAndroidLog [system] {
+  link "log"
+  export *
+}
