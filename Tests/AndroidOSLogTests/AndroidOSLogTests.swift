@@ -11,10 +11,12 @@ class AndroidOSLogTests : XCTestCase {
 
         logger.log("Android logger test: LOG message")
 
-        logger.info("Android logger test: INFO message")
-        logger.error("Android logger test: ERROR message")
-        logger.debug("Android logger test: DEBUG message")
         logger.trace("Android logger test: TRACE message")
+        logger.debug("Android logger test: DEBUG message")
+        logger.info("Android logger test: INFO message")
+        logger.notice("Android logger test: NOTICE message")
+        logger.warning("Android logger test: WARNING message")
+        logger.error("Android logger test: ERROR message")
         logger.critical("Android logger test: CRITICAL message")
 
         logger.log(level: OSLogType.default, "Android logger test: DEFAULT message")

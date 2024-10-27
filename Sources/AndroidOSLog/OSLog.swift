@@ -21,11 +21,7 @@ public struct Logger : @unchecked Sendable {
     }
 
     public func log(_ message: OSLogMessage) {
-        androidLog(priority: ANDROID_LOG_DEFAULT, message: message)
-    }
-
-    public func log(level: OSLogType, _ message: OSLogMessage) {
-        androidLog(priority: ANDROID_LOG_DEFAULT, message: message)
+        androidLog(priority: ANDROID_LOG_INFO, message: message)
     }
 
     public func trace(_ message: OSLogMessage) {
@@ -60,7 +56,7 @@ public struct Logger : @unchecked Sendable {
         androidLog(priority: ANDROID_LOG_FATAL, message: message)
     }
 
-    public func log(type: OSLogType, message: OSLogMessage) {
+    public func log(level type: OSLogType, _ message: OSLogMessage) {
         let priority: android_LogPriority
         switch type {
         case .info: priority = ANDROID_LOG_INFO
@@ -75,12 +71,8 @@ public struct Logger : @unchecked Sendable {
 
     private func androidLog(priority: android_LogPriority, message: OSLogMessage) {
         let tag = subsystem.isEmpty && category.isEmpty ? "" : (subsystem + "/" + category)
-        tag.withCString { tagPtr in
-            message.withCString { messagePtr in
-                //swift_android_log(priority, tagPtr, messagePtr)
-                __android_log_write(Int32(priority.rawValue), tagPtr, messagePtr)
-            }
-        }
+        //swift_android_log(priority, tagPtr, messagePtr)
+        __android_log_write(Int32(priority.rawValue), tag, message)
     }
 }
 
