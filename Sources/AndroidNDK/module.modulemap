@@ -1,0 +1,4 @@
+module AndroidNDK [system] {
+  link "log"
+  export *
+}

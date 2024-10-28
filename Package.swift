@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "swift-android-oslog",
+    name: "swift-android-native",
     products: [
-        .library(name: "AndroidOSLog", targets: ["AndroidOSLog"])
+        .library(name: "AndroidLogging", targets: ["AndroidLogging"])
     ],
     targets: [
-        .systemLibrary(name: "CAndroidLog"),
-        .target(name: "AndroidOSLog", dependencies: [.target(name: "CAndroidLog", condition: .when(platforms: [.android]))]),
-        .testTarget(name: "AndroidOSLogTests", dependencies: [.target(name: "AndroidOSLog")])
+        .systemLibrary(name: "AndroidNDK"),
+        .target(name: "AndroidLogging", dependencies: [.target(name: "AndroidNDK", condition: .when(platforms: [.android]))]),
+        .testTarget(name: "AndroidLoggingTests", dependencies: [.target(name: "AndroidLogging")])
     ]
 )

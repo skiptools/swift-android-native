@@ -1,6 +1,6 @@
 #if os(Android)
 import Android
-import CAndroidLog
+import AndroidNDK
 
 public typealias OSLogMessage = String
 
@@ -69,10 +69,13 @@ public struct Logger : @unchecked Sendable {
         androidLog(priority: priority, message: message)
     }
 
+    private var logTag: String {
+        subsystem.isEmpty && category.isEmpty ? "" : (subsystem + "/" + category)
+    }
+
     private func androidLog(priority: android_LogPriority, message: OSLogMessage) {
-        let tag = subsystem.isEmpty && category.isEmpty ? "" : (subsystem + "/" + category)
-        //swift_android_log(priority, tagPtr, messagePtr)
-        __android_log_write(Int32(priority.rawValue), tag, message)
+        //swift_android_log(priority, logTag, messagePtr)
+        __android_log_write(Int32(priority.rawValue), logTag, message)
     }
 }
 
@@ -101,7 +104,7 @@ extension OSLogType {
     public static let fault: OSLogType = OSLogType(0x11)
 }
 
-#elseif canImport(OSLog)
+#elseif canImport(os)
 @_exported import OSLog
 #endif
 
