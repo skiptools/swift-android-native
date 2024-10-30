@@ -84,9 +84,8 @@ function.
 ### Limitations
 
 - `OSLogMessage` is simply a typealias to `Swift.String`, and does not implement any of the [redaction features](https://developer.apple.com/documentation/os/logging/generating_log_messages_from_your_code#3665948) of the Darwin version.
-- 
 
-## License
+# License
 
 Licensed under the Apache 2.0 license with a runtime library exception,
 meaning you do not need to attribute the project in your application.
