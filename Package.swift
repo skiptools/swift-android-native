@@ -9,9 +9,9 @@ let package = Package(
     ],
     targets: [
         .systemLibrary(name: "AndroidNDK"),
+        .target(name: "AndroidLogging", dependencies: [.target(name: "AndroidNDK", condition: .when(platforms: [.android]))]),
+        .testTarget(name: "AndroidLoggingTests", dependencies: ["AndroidLogging"]),
         .target(name: "AndroidNative", dependencies: ["AndroidLogging"]),
         .testTarget(name: "AndroidNativeTests", dependencies: ["AndroidNative"]),
-        .target(name: "AndroidLogging", dependencies: [.target(name: "AndroidNDK", condition: .when(platforms: [.android]))]),
-        .testTarget(name: "AndroidLoggingTests", dependencies: ["AndroidLogging"])
     ]
 )

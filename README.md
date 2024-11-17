@@ -16,7 +16,7 @@ Add the package to your `Package.swift` file:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/skiptools/swift-android-logging.git", from: "1.0.0")
+    .package(url: "https://github.com/skiptools/swift-android-native.git", from: "1.0.0")
 ]
 ```
 
@@ -34,7 +34,7 @@ Add the `AndroidLogging` module as a conditional dependency for any targets that
 
 ```swift
 .target(name: "MyTarget", dependencies: [
-    .product(name: "AndroidLogging", package: "swift-android-logging", condition: .when(platforms: [.android]))
+    .product(name: "AndroidLogging", package: "swift-android-native", condition: .when(platforms: [.android]))
 ])
 ```
 
