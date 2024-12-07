@@ -2,6 +2,7 @@ import XCTest
 import AndroidNative
 
 class AndroidNativeTests : XCTestCase {
+    @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
     public func testMainActor() async {
         let actorDemo = await MainActorDemo()
         let result = await actorDemo.add(n1: 1, n2: 2)
