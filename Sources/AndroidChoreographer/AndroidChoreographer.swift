@@ -34,8 +34,8 @@ public final class AndroidChoreographer : @unchecked Sendable {
         }
     }
 
-    public func postFrameCallback(_ callback: @convention(c)(Int64, UnsafeMutableRawPointer?) -> ()) {
-        AChoreographer_postFrameCallback64(_choreographer, callback, nil)
+    public func postFrameCallback(_ callback: @convention(c)(Int, UnsafeMutableRawPointer?) -> ()) {
+        AChoreographer_postFrameCallback(_choreographer, callback, nil)
     }
 }
 
