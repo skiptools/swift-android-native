@@ -2,6 +2,7 @@
 import Android
 import AndroidNDK
 import AndroidLogging
+import CoreFoundation
 
 let logger = Logger(subsystem: "AndroidChoreographer", category: "AndroidChoreographer")
 
@@ -33,9 +34,9 @@ public final class AndroidChoreographer : @unchecked Sendable {
         }
     }
 
-//    public func postFrameCallback(_ callback: @convention(c)(Int64, UnsafeMutableRawPointer?) -> ()) {
-//        AChoreographer_postFrameCallback64(_choreographer, callback, nil)
-//    }
+    public func postFrameCallback(_ callback: @convention(c)(Int64, UnsafeMutableRawPointer?) -> ()) {
+        AChoreographer_postFrameCallback64(_choreographer, callback, nil)
+    }
 }
 
 // no longer used: we use the AndroidLooper instead, which will be more efficient than trying to drain the main queue on every frame render
@@ -47,12 +48,15 @@ public final class AndroidChoreographer : @unchecked Sendable {
 //// C-compatible callback wrapper
 //private var choreographerCallback: AChoreographer_frameCallback64 = { _, _ in
 //    // Drain the main queue
-//    _dispatch_main_queue_callback_4CF()
+//    //_dispatch_main_queue_callback_4CF()
+//    while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.0, true) == CFRunLoopRunResult.handledSource {
+//        // continue handling queued events without a timeout
+//    }
 //
 //    // AChoreographer_postFrameCallback64 is single-shot, so we need to re-enqueue the callback each frame
 //    enqueueMainChoreographer()
 //}
-//
+
 //// https://github.com/apple-oss-distributions/libdispatch/blob/bd82a60ee6a73b4eca50af028b48643d51aaf1ea/src/queue.c#L8237
 //// https://forums.swift.org/t/main-dispatch-queue-in-linux-sdl-app/31708/3
 //@_silgen_name("_dispatch_main_queue_callback_4CF")

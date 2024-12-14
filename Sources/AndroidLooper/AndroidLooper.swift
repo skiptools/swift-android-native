@@ -189,12 +189,9 @@ open class AndroidLooperExecutor: SerialExecutor, @unchecked Sendable {
         }
     }
 
-    //var _signalCount = UInt64(0)
-
     /// Increment number of remaining events on eventFd
     func signal() throws {
         var value = UInt64(1)
-        //logger.info("### AndroidLooperExecutor.signal(): \(value)")
         try withUnsafeBytes(of: &value) {
             guard try _eventFd.write($0) == MemoryLayout<UInt64>.size else {
                 throw Errno.outOfRange
@@ -205,43 +202,16 @@ open class AndroidLooperExecutor: SerialExecutor, @unchecked Sendable {
     /// Drain job queue
     fileprivate func drain() {
         if let eventsRemaining = try? eventsRemaining {
-            //logger.info("### AndroidLooperExecutor.drain(): \(eventsRemaining)")
-            //var handledSource = 0
             for _ in 0..<eventsRemaining {
-                //handledSource += CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.0, true) == CFRunLoopRunResult.handledSource ? 1 : 0
-                //logger.info("### CFRunLoopRunInMode result: \(result)")
-
                 let job = dequeue()
                 guard let job else { break }
                 job.runSynchronously(on: asUnownedSerialExecutor())
             }
-
-//            if handledSource < eventsRemaining {
-//                try! signal()
-////                CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, false)
-//            }
         }
-
-        // always dispatch the pending main queue callbacks
-        // https://forums.swift.org/t/main-dispatch-queue-in-linux-sdl-app/31708/3
-        //_dispatch_main_queue_callback_4CF() // check for DispatchQueue.main
 
         while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.0, true) == CFRunLoopRunResult.handledSource {
             // continue handling queued events without a timeout
         }
-
-        // block and wait for a source; this is needed because the no-timeout version is sometimes run before the action gets added
-        //CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.001, false)
-
-        //assert(Thread.isMainThread)
-
-
-//        while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.0, true) == CFRunLoopRunResult.handledSource {
-//            // keep running until we have processed all the pending sources
-//            //DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: drain)
-//            //_dispatch_main_queue_callback_4CF()
-//        }
-
     }
 
     /// Dequeue a single job
@@ -293,23 +263,29 @@ private extension AndroidMainActor {
         guard !didInstallGlobalExecutor else { return }
         didInstallGlobalExecutor = true
 
-        typealias swift_task_enqueueGlobal_hook_Fn = @convention(thin) (UnsafeMutablePointer<Job>, swift_task_enqueueGlobal_original) -> Void
-        let swift_task_enqueueGlobal_hook_impl: swift_task_enqueueGlobal_hook_Fn = { job, original in
-            //logger.info("### swift_task_enqueueGlobal_hook_impl: job: \(job)")
-            original(job)
-            try! AndroidMainActor._executor.signal()
+//        typealias swift_task_enqueueGlobal_hook_Fn = @convention(thin) (UnsafeMutablePointer<Job>, swift_task_enqueueGlobal_original) -> Void
+//        let swift_task_enqueueGlobal_hook_impl: swift_task_enqueueGlobal_hook_Fn = { job, original in
+//            logger.info("### swift_task_enqueueGlobal_hook_impl: job: \(job.pointee)")
+//
+////            let flags = job.pointee.Flags
+////            let unownedJob = unsafeBitCast(job.pointee, to: UnownedJob.self) // Fatal error: Can't unsafeBitCast between types of different sizes
+////            logger.info("### swift_task_enqueueGlobal_hook_impl: unownedJob: \(unownedJob)")
+//
+//            //AndroidMainActor._executor.enqueue(unownedJob)
+//
+//            original(job)
+//            try! AndroidMainActor._executor.signal()
+//        }
+//        swift_task_enqueueGlobal_hook = unsafeBitCast(swift_task_enqueueGlobal_hook_impl, to: UnsafeMutableRawPointer?.self)
 
-        }
-        swift_task_enqueueGlobal_hook = unsafeBitCast(swift_task_enqueueGlobal_hook_impl, to: UnsafeMutableRawPointer?.self)
-
-        // this would be a better way to signal the main looper, but unfortunately it is never called: https://github.com/swiftlang/swift/issues/63104
-        typealias swift_task_enqueueMainExecutor_hook_Fn = @convention(thin) (UnsafeMutablePointer<Job>, swift_task_enqueueMainExecutor_original) -> Void
-        let swift_task_enqueueMainExecutor_hook_impl: swift_task_enqueueMainExecutor_hook_Fn = { job, original in
-            //logger.info("### swift_task_enqueueMainExecutor_hook_Fn")
-            original(job)
-            try! AndroidMainActor._executor.signal() // signal the main looper to wake a drain the main queue
-        }
-        swift_task_enqueueMainExecutor_hook = unsafeBitCast(swift_task_enqueueMainExecutor_hook_impl, to: UnsafeMutableRawPointer?.self)
+//        // this would be a better way to signal the main looper, but unfortunately it is never called: https://github.com/swiftlang/swift/issues/63104
+//        typealias swift_task_enqueueMainExecutor_hook_Fn = @convention(thin) (UnsafeMutablePointer<Job>, swift_task_enqueueMainExecutor_original) -> Void
+//        let swift_task_enqueueMainExecutor_hook_impl: swift_task_enqueueMainExecutor_hook_Fn = { job, original in
+//            //logger.info("### swift_task_enqueueMainExecutor_hook_Fn")
+//            original(job)
+//            try! AndroidMainActor._executor.signal() // signal the main looper to wake a drain the main queue
+//        }
+//        swift_task_enqueueMainExecutor_hook = unsafeBitCast(swift_task_enqueueMainExecutor_hook_impl, to: UnsafeMutableRawPointer?.self)
 
 
 //        typealias swift_task_enqueueGlobalWithDelay_hook_Fn = @convention(thin) (UInt64, UnsafeMutablePointer<Job>, swift_task_enqueueGlobalWithDelay_original) -> Void
@@ -339,8 +315,8 @@ private extension AndroidMainActor {
     }
 }
 
-// https://github.com/apple-oss-distributions/libdispatch/blob/bd82a60ee6a73b4eca50af028b48643d51aaf1ea/src/queue.c#L8237
-// https://forums.swift.org/t/main-dispatch-queue-in-linux-sdl-app/31708/3
-@_silgen_name("_dispatch_main_queue_callback_4CF")
-func _dispatch_main_queue_callback_4CF()
+//// https://github.com/apple-oss-distributions/libdispatch/blob/bd82a60ee6a73b4eca50af028b48643d51aaf1ea/src/queue.c#L8237
+//// https://forums.swift.org/t/main-dispatch-queue-in-linux-sdl-app/31708/3
+//@_silgen_name("_dispatch_main_queue_callback_4CF")
+//func _dispatch_main_queue_callback_4CF()
 #endif
