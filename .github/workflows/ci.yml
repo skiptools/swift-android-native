@@ -13,6 +13,7 @@ jobs:
     # emulator fails to launch with: HVF error: HV_UNSUPPORTED
     #runs-on: macos-15
     runs-on: macos-13
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: "Test Swift Package Locally"

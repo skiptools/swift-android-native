@@ -315,8 +315,11 @@ private extension AndroidMainActor {
     }
 }
 
-//// https://github.com/apple-oss-distributions/libdispatch/blob/bd82a60ee6a73b4eca50af028b48643d51aaf1ea/src/queue.c#L8237
-//// https://forums.swift.org/t/main-dispatch-queue-in-linux-sdl-app/31708/3
-//@_silgen_name("_dispatch_main_queue_callback_4CF")
-//func _dispatch_main_queue_callback_4CF()
+// https://github.com/apple-oss-distributions/libdispatch/blob/bd82a60ee6a73b4eca50af028b48643d51aaf1ea/src/queue.c#L8237
+// https://forums.swift.org/t/main-dispatch-queue-in-linux-sdl-app/31708/3
+@_silgen_name("_dispatch_main_queue_callback_4CF")
+func _dispatch_main_queue_callback_4CF()
+
+@_silgen_name("_dispatch_get_main_queue_port_4CF")
+func _dispatch_get_main_queue_port_4CF() -> Int32
 #endif
