@@ -36,8 +36,6 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
         public static let invalid = Events(rawValue: 1 << 4)
     }
 
-    public typealias Callback = @convention(c) (CInt, CInt, UnsafeMutableRawPointer?) -> CInt
-
     private let _looper: OpaquePointer
 
     public init(wrapping looper: OpaquePointer) {
@@ -67,7 +65,7 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
     }
 
     /// Adds a new file descriptor to be polled by the looper.
-    public func add(fd: FileDescriptor, ident: CInt = 0, events: Events = .input, callback: Callback? = nil, data: UnsafeMutableRawPointer? = nil) throws {
+    public func add(fd: FileDescriptor, ident: CInt = 0, events: Events = .input, callback: LooperCallback? = nil, data: UnsafeMutableRawPointer? = nil) throws {
         if ALooper_addFd(_looper, fd.rawValue, callback != nil ? CInt(ALOOPER_POLL_CALLBACK) : ident, events.rawValue, callback, data) != 1 {
             throw LooperError.addFdFailure
         }
@@ -131,6 +129,8 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
         }
     }
 }
+
+public typealias LooperCallback = @convention(c) (CInt, CInt, UnsafeMutableRawPointer?) -> CInt
 
 private var _mainLooper: OpaquePointer?
 
@@ -263,55 +263,31 @@ private extension AndroidMainActor {
         guard !didInstallGlobalExecutor else { return }
         didInstallGlobalExecutor = true
 
-//        typealias swift_task_enqueueGlobal_hook_Fn = @convention(thin) (UnsafeMutablePointer<Job>, swift_task_enqueueGlobal_original) -> Void
-//        let swift_task_enqueueGlobal_hook_impl: swift_task_enqueueGlobal_hook_Fn = { job, original in
-//            logger.info("### swift_task_enqueueGlobal_hook_impl: job: \(job.pointee)")
-//
-////            let flags = job.pointee.Flags
-////            let unownedJob = unsafeBitCast(job.pointee, to: UnownedJob.self) // Fatal error: Can't unsafeBitCast between types of different sizes
-////            logger.info("### swift_task_enqueueGlobal_hook_impl: unownedJob: \(unownedJob)")
-//
-//            //AndroidMainActor._executor.enqueue(unownedJob)
-//
-//            original(job)
-//            try! AndroidMainActor._executor.signal()
-//        }
-//        swift_task_enqueueGlobal_hook = unsafeBitCast(swift_task_enqueueGlobal_hook_impl, to: UnsafeMutableRawPointer?.self)
 
-//        // this would be a better way to signal the main looper, but unfortunately it is never called: https://github.com/swiftlang/swift/issues/63104
-//        typealias swift_task_enqueueMainExecutor_hook_Fn = @convention(thin) (UnsafeMutablePointer<Job>, swift_task_enqueueMainExecutor_original) -> Void
-//        let swift_task_enqueueMainExecutor_hook_impl: swift_task_enqueueMainExecutor_hook_Fn = { job, original in
-//            //logger.info("### swift_task_enqueueMainExecutor_hook_Fn")
-//            original(job)
-//            try! AndroidMainActor._executor.signal() // signal the main looper to wake a drain the main queue
-//        }
-//        swift_task_enqueueMainExecutor_hook = unsafeBitCast(swift_task_enqueueMainExecutor_hook_impl, to: UnsafeMutableRawPointer?.self)
+        let looperCallback: LooperCallback = { ft, event, data in
+            while true {
+                switch CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.0, true) {
+                case CFRunLoopRunResult.handledSource:
+                    continue // continue run loop
+                case CFRunLoopRunResult.finished:
+                    return 1 // continue listening for events
+                case CFRunLoopRunResult.stopped:
+                    return 0 // stop listening
+                case CFRunLoopRunResult.timedOut:
+                    return 1 // continue listening for events
+                }
+            }
+        }
 
+        let mainLoop = CFRunLoopGetMain()
 
-//        typealias swift_task_enqueueGlobalWithDelay_hook_Fn = @convention(thin) (UInt64, UnsafeMutablePointer<Job>, swift_task_enqueueGlobalWithDelay_original) -> Void
-//        let swift_task_enqueueGlobalWithDelay_hook_impl: swift_task_enqueueGlobalWithDelay_hook_Fn = { delay, job, original in
-//            logger.info("### swift_task_enqueueGlobalWithDelay_hook_impl")
-//            original(job)
-//        }
-//        swift_task_enqueueGlobalWithDelay_hook = unsafeBitCast(swift_task_enqueueGlobalWithDelay_hook_impl, to: UnsafeMutableRawPointer?.self)
+        // https://github.com/readdle/swift-android-ndk/blob/main/Sources/CAndroidNDK/MainRunLoop.c#L71
+        //__CFPort wakeUpPort = mainLoop->_wakeUpPort;
+        //int result = ALooper_addFd(_mainLooper, wakeUpPort, 0, CInt(ALOOPER_EVENT_INPUT), &looperCallback, nil)
+        //mainLoop->_perRunData->ignoreWakeUps = 0x0;
 
-//        #if compiler(>=5.7)
-//        typealias swift_task_enqueueGlobalWithDeadline_hook_Fn = @convention(thin) (Int64, Int64, Int64, Int64, Int32, UnsafeMutablePointer<Job>, swift_task_enqueueGlobalWithDelay_original) -> Void
-//        let swift_task_enqueueGlobalWithDeadline_hook_impl: swift_task_enqueueGlobalWithDeadline_hook_Fn = { sec, nsec, tsec, tnsec, clock, job, original in
-//            logger.info("### swift_task_enqueueGlobalWithDeadline_hook_impl")
-//            original(job)
-//        }
-//        swift_task_enqueueGlobalWithDeadline_hook = unsafeBitCast(swift_task_enqueueGlobalWithDeadline_hook_impl, to: UnsafeMutableRawPointer?.self)
-//        #endif
-//
-//        #if compiler(>=5.9)
-//        typealias swift_task_asyncMainDrainQueue_hook_Fn = @convention(thin) (swift_task_asyncMainDrainQueue_original, swift_task_asyncMainDrainQueue_override) -> Void
-//        let swift_task_asyncMainDrainQueue_hook_impl: swift_task_asyncMainDrainQueue_hook_Fn = { _, _ in
-//            logger.info("### swift_task_asyncMainDrainQueue_hook_impl")
-//            // _unsafe_event_loop_yield()
-//        }
-//        swift_task_asyncMainDrainQueue_hook = unsafeBitCast(swift_task_asyncMainDrainQueue_hook_impl, to: UnsafeMutableRawPointer?.self)
-//        #endif
+        let dispatchPort = _dispatch_get_main_queue_port_4CF()
+        let result = ALooper_addFd(_mainLooper, dispatchPort, 0, CInt(ALOOPER_EVENT_INPUT), looperCallback, nil)
     }
 }
 
