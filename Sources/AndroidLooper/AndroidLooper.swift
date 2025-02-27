@@ -1,4 +1,4 @@
-
+// Copyright 2025 Skip
 #if os(Android)
 import Android
 import AndroidNDK
@@ -8,9 +8,11 @@ import ConcurrencyRuntimeC
 import CoreFoundation
 import Dispatch
 
-let logger = Logger(subsystem: "AndroidLooper", category: "AndroidLooper")
+let logger = Logger(subsystem: "swift.android.native", category: "AndroidLooper")
 
 // Much of this is adapted from https://github.com/PADL/AndroidLooper/blob/0f26e1bdb989120f5689d74ea69a0525833ecd52/Sources/AndroidLooper/ALooper.swift
+
+/// https://developer.android.com/ndk/reference/group/looper
 public struct AndroidLooper: ~Copyable, @unchecked Sendable {
     public enum LooperError: Error {
         case addFdFailure

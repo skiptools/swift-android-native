@@ -1,9 +1,11 @@
+// Copyright 2025 Skip
 #if os(Android)
 import Android
 import AndroidNDK
 
 public typealias OSLogMessage = String
 
+/// https://developer.android.com/ndk/reference/group/logging
 public struct Logger : @unchecked Sendable {
     public let subsystem: String
     public let category: String

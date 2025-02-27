@@ -5,6 +5,7 @@ let package = Package(
     name: "swift-android-native",
     products: [
         .library(name: "AndroidNative", targets: ["AndroidNative"]),
+        .library(name: "AndroidAssetManager", targets: ["AndroidAssetManager"]),
         .library(name: "AndroidLogging", targets: ["AndroidLogging"]),
         .library(name: "AndroidLooper", targets: ["AndroidLooper"]),
         .library(name: "AndroidChoreographer", targets: ["AndroidLooper"]),
@@ -25,6 +26,12 @@ let package = Package(
         ]),
         .testTarget(name: "AndroidSystemTests", dependencies: [
             "AndroidSystem",
+        ]),
+        .target(name: "AndroidAssetManager", dependencies: [
+            .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
+        ]),
+        .testTarget(name: "AndroidAssetManagerTests", dependencies: [
+            "AndroidAssetManager",
         ]),
         .target(name: "AndroidLogging", dependencies: [
             .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
@@ -48,6 +55,7 @@ let package = Package(
             "AndroidChoreographer",
         ]),
         .target(name: "AndroidNative", dependencies: [
+            "AndroidAssetManager",
             "AndroidLogging",
             "AndroidLooper",
             "AndroidChoreographer",

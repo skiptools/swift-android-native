@@ -1,11 +1,13 @@
+// Copyright 2025 Skip
 #if os(Android)
 import Android
 import AndroidNDK
 import AndroidLogging
 import CoreFoundation
 
-let logger = Logger(subsystem: "AndroidChoreographer", category: "AndroidChoreographer")
+let logger = Logger(subsystem: "swift.android.native", category: "AndroidChoreographer")
 
+/// https://developer.android.com/ndk/reference/group/choreographer
 public final class AndroidChoreographer : @unchecked Sendable {
     private let _choreographer: OpaquePointer
 

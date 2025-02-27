@@ -85,6 +85,58 @@ function.
 
 - `OSLogMessage` is simply a typealias to `Swift.String`, and does not implement any of the [redaction features](https://developer.apple.com/documentation/os/logging/generating_log_messages_from_your_code#3665948) of the Darwin version.
 
+
+# AndroidAssetManager
+
+This module provides an [AssetManager](https://developer.android.com/ndk/reference/group/asset) API for native Swift on Android.
+
+## Installation
+
+### Swift Package Manager
+
+Add the `AndroidAssetManager` module as a conditional dependency for any targets that need it:
+
+```swift
+.target(name: "MyTarget", dependencies: [
+    .product(name: "AndroidAssetManager", package: "swift-android-native", condition: .when(platforms: [.android]))
+])
+```
+
+
+# AndroidChoreographer
+
+This module provides a [Choreographer](https://developer.android.com/ndk/reference/group/choreographer) API for native Swift on Android.
+
+## Installation
+
+### Swift Package Manager
+
+Add the `AndroidChoreographer` module as a conditional dependency for any targets that need it:
+
+```swift
+.target(name: "MyTarget", dependencies: [
+    .product(name: "AndroidChoreographer", package: "swift-android-native", condition: .when(platforms: [.android]))
+])
+```
+
+
+# AndroidLooper
+
+This module provides a [Looper](https://developer.android.com/ndk/reference/group/looper) API for native Swift on Android.
+
+## Installation
+
+### Swift Package Manager
+
+Add the `AndroidLooper` module as a conditional dependency for any targets that need it:
+
+```swift
+.target(name: "MyTarget", dependencies: [
+    .product(name: "AndroidLooper", package: "swift-android-native", condition: .when(platforms: [.android]))
+])
+```
+
+
 # License
 
 Licensed under the Apache 2.0 license with a runtime library exception,
