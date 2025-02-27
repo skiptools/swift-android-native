@@ -2,10 +2,7 @@
 #if os(Android)
 import Android
 import AndroidNDK
-import AndroidLogging
 import Foundation
-
-let logger = Logger(subsystem: "swift.android.native", category: "AndroidAssetManager")
 
 /// https://developer.android.com/ndk/reference/group/asset
 public final class AndroidAssetManager : @unchecked Sendable {
