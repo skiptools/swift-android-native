@@ -50,15 +50,23 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
     }
 
     // Called from applicaton entry point
-    public static func setupMainLooper() {
+    public static func setupMainLooper() -> Bool {
+        logger.debug("setupMainLooper")
         if _mainLooper != nil {
             ALooper_release(_mainLooper)
+            _mainLooper = nil
         }
+
         _mainLooper = ALooper_forThread()
+        if _mainLooper == nil {
+            // this happens sometimes when running in test cases
+            logger.debug("setupMainLooper: ALooper_forThread: no looper found for thread")
+            return false
+        }
         ALooper_acquire(_mainLooper)
 
         // override the global executors to wake the main looper to drain the queue whenever something is scheduled
-        AndroidMainActor.installGlobalExecutor()
+        return AndroidMainActor.installGlobalExecutor()
     }
 
     func deinitMainLooper() {
@@ -134,7 +142,7 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
 
 public typealias LooperCallback = @convention(c) (CInt, CInt, UnsafeMutableRawPointer?) -> CInt
 
-private var _mainLooper: OpaquePointer?
+private var _mainLooper: OpaquePointer? = nil
 
 public extension AndroidLooper {
     static var main: Self {
@@ -226,7 +234,6 @@ open class AndroidLooperExecutor: SerialExecutor, @unchecked Sendable {
 
     /// Enqueue a single job
     public func enqueue(_ job: UnownedJob) {
-        //logger.info("### AndroidLooperExecutor.enqueue(\(job)")
         _queue.withLock { queue in
             queue.append(job)
         }
@@ -261,10 +268,11 @@ private extension AndroidMainActor {
     /// https://github.com/swiftlang/swift-evolution/blob/main/proposals/0392-custom-actor-executors.md#overriding-the-mainactor-executor
     ///
     /// See also [a draft proposal for custom executors](https://github.com/rjmccall/swift-evolution/blob/custom-executors/proposals/0000-custom-executors.md#the-default-global-concurrent-executor)
-    static func installGlobalExecutor() {
-        guard !didInstallGlobalExecutor else { return }
+    static func installGlobalExecutor() -> Bool {
+        if didInstallGlobalExecutor {
+            return false
+        }
         didInstallGlobalExecutor = true
-
 
         let looperCallback: LooperCallback = { ft, event, data in
             while true {
@@ -290,6 +298,7 @@ private extension AndroidMainActor {
 
         let dispatchPort = _dispatch_get_main_queue_port_4CF()
         let result = ALooper_addFd(_mainLooper, dispatchPort, 0, CInt(ALOOPER_EVENT_INPUT), looperCallback, nil)
+        return result == 1 // Returns 1 if the file descriptor was added or -1 if an error occurred.
     }
 }
 

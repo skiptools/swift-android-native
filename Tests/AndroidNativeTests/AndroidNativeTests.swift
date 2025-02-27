@@ -11,7 +11,6 @@ class AndroidNativeTests : XCTestCase {
 
         for i in 0..<100 {
             tasks.append(Task(priority: [.low, .medium, .high].randomElement()!) {
-                //print("### Task: \(Thread.current)")
                 assert(!Thread.isMainThread)
                 return await actorDemo.add(n1: i, n2: i)
             })
@@ -32,7 +31,6 @@ class AndroidNativeTests : XCTestCase {
     }
 
     func add(n1: Int, n2: Int) -> Int {
-        //print("### MainActorDemo: \(Thread.current)")
         assert(Thread.isMainThread)
         return n1 + n2
     }
