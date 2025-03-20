@@ -9,18 +9,23 @@ on:
   schedule:
     - cron:  '45 2,13 * * *'
 jobs:
-  test:
-    # emulator fails to launch with: HVF error: HV_UNSUPPORTED
-    #runs-on: macos-15
-    #runs-on: macos-13
+  linux-android:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: "Test Swift Package Locally"
         run: swift test
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
-      #- name: "Test Swift Package on iOS"
-      #  run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
+
+  macos-ios:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Test Swift Package Locally"
+        run: swift test
+      - name: "Test Swift Package on iOS"
+        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
 

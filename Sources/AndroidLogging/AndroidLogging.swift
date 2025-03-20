@@ -111,7 +111,7 @@ public struct Logger : @unchecked Sendable {
 
         androidLog(priority: priority, message: message)
         #else
-        print("\(logTag) log \(priority): \(message)")
+        print("\(logTag) log \(type): \(message)")
         #endif
     }
 
