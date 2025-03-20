@@ -86,6 +86,62 @@ function.
 - `OSLogMessage` is simply a typealias to `Swift.String`, and does not implement any of the [redaction features](https://developer.apple.com/documentation/os/logging/generating_log_messages_from_your_code#3665948) of the Darwin version.
 
 
+# AndroidContext
+
+This module provides a minimal wrapper for [android.content.Context](https://developer.android.com/reference/android/content/Context)
+that uses [SwiftJNI](https://github.com/skiptools/swift-jni) to bridge into the global application context.
+
+## Installation
+
+Add the `AndroidContext` module as a conditional dependency for any targets that need it:
+
+```swift
+.target(name: "MyTarget", dependencies: [
+    .product(name: "AndroidContext", package: "swift-android-native", condition: .when(platforms: [.android]))
+])
+```
+
+## Usage
+
+```swift
+let context = try AndroidContext.application
+let packageName = try context.getPackageName()
+```
+
+## Internals
+
+### Implementation details
+
+By default, the `AndroidContext.application` accessor will try to invoke the JNI method
+`android.app.ActivityThread.currentApplication()Landroid/app/Application;` to obtain the
+global application context. This can be overridden at app initialization time by setting
+the `SWIFT_ANDROID_CONTEXT_FACTORY` environment to a different static accessor, such as:
+
+```swift
+// another way to access the global context (deprecated)
+setenv("SWIFT_ANDROID_CONTEXT_FACTORY", "android.app.AppGlobals.getInitialApplication()Landroid/app/Application;", 1)
+
+let context = try AndroidContext.application
+```
+
+Such setup must be performed before the first time the `AndroidContext.application`
+accessor is called, as the result will be cached the first time it is invoked.
+
+Alternatively, if the application bootstrapping code already has access to a
+JNI context and `jobject` reference to the application context, it can be
+set directly in the static `contextPointer` field. For example,
+if your application uses an NDK [ANativeActivity](https://developer.android.com/ndk/reference/struct/a-native-activity)
+activity, then the context can be accessed from its reference to the underlying
+[android.app.NativeActivity](https://developer.android.com/reference/android/app/NativeActivity)
+instance:
+
+```swift
+let nativeActivity: ANativeActivity = …
+AndroidContext.contextPointer = nativeActivity.clazz
+let context = try AndroidContext.application // returns the wrapper around the application context
+```
+
+
 # AndroidAssetManager
 
 This module provides an [AssetManager](https://developer.android.com/ndk/reference/group/asset) API for native Swift on Android.
