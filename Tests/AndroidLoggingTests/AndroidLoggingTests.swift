@@ -19,7 +19,6 @@ class AndroidLoggingTests : XCTestCase {
         logger.error("Android logger test: ERROR message")
         logger.critical("Android logger test: CRITICAL message")
 
-        #if
         logger.log(level: OSLogType.default, "Android logger test: DEFAULT message")
         logger.log(level: OSLogType.info, "Android logger test: INFO message")
         logger.log(level: OSLogType.debug, "Android logger test: DEBUG message")
