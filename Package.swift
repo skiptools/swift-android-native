@@ -5,12 +5,14 @@ let package = Package(
     name: "swift-android-native",
     products: [
         .library(name: "AndroidNative", targets: ["AndroidNative"]),
+        .library(name: "AndroidContext", targets: ["AndroidContext"]),
         .library(name: "AndroidAssetManager", targets: ["AndroidAssetManager"]),
         .library(name: "AndroidLogging", targets: ["AndroidLogging"]),
         .library(name: "AndroidLooper", targets: ["AndroidLooper"]),
         .library(name: "AndroidChoreographer", targets: ["AndroidLooper"]),
     ],
     dependencies: [
+        .package(url: "https://source.skip.tools/swift-jni.git", "0.0.0"..<"2.0.0"),
     ],
     targets: [
         .target(name: "AndroidNDK", linkerSettings: [
@@ -28,6 +30,7 @@ let package = Package(
             "AndroidSystem",
         ]),
         .target(name: "AndroidAssetManager", dependencies: [
+            .product(name: "SwiftJNI", package: "swift-jni"),
             .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
         ]),
         .testTarget(name: "AndroidAssetManagerTests", dependencies: [
@@ -38,6 +41,13 @@ let package = Package(
         ]),
         .testTarget(name: "AndroidLoggingTests", dependencies: [
             "AndroidLogging",
+        ]),
+        .target(name: "AndroidContext", dependencies: [
+            "AndroidAssetManager",
+            .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
+        ]),
+        .testTarget(name: "AndroidContextTests", dependencies: [
+            "AndroidContext",
         ]),
         .target(name: "AndroidLooper", dependencies: [
             "AndroidSystem",
@@ -55,7 +65,7 @@ let package = Package(
             "AndroidChoreographer",
         ]),
         .target(name: "AndroidNative", dependencies: [
-            "AndroidAssetManager",
+            "AndroidContext",
             "AndroidLogging",
             "AndroidLooper",
             "AndroidChoreographer",

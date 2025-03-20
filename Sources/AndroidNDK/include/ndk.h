@@ -3,6 +3,7 @@
 #include <android/log.h>
 #include <android/looper.h>
 #include <android/choreographer.h>
+#include <android/native_activity.h>
 
 // needed for AndroidSystem
 #include <sys/epoll.h>

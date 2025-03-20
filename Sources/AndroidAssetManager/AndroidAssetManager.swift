@@ -2,20 +2,33 @@
 #if os(Android)
 import Android
 import AndroidNDK
+#endif
+import SwiftJNI
 import Foundation
 
 /// https://developer.android.com/ndk/reference/group/asset
+//@available(macOS, unavailable)
+@available(iOS, unavailable)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
 public final class AndroidAssetManager : @unchecked Sendable {
     let assetManager: OpaquePointer // AAssetManager
     typealias AssetHandle = OpaquePointer
     
     /// Create the asset manager from the given JNI environment with a jobject pointer to the Java AssetManager.
-    public init(env: UnsafeMutablePointer<JNIEnv?>, peer: jobject) {
+    public init(env: UnsafeMutablePointer<JNIEnv?>, peer: JavaObjectPointer) {
+        #if !os(Android)
+        fatalError("only implemented for Android")
+        #else
         self.assetManager = AAssetManager_fromJava(env, peer)
+        #endif
     }
 
     /// List the file names for each asset in the specific directory
     public func listAssets(inDirectory directory: String) -> [String]? {
+        #if !os(Android)
+        fatalError("only implemented for Android")
+        #else
         guard let assetDir = AAssetManager_openDir(assetManager, directory) else { return nil }
         defer { AAssetDir_close(assetDir) }
 
@@ -24,14 +37,19 @@ public final class AndroidAssetManager : @unchecked Sendable {
             assets.append(String(cString: assetName))
         }
         return assets
+        #endif
     }
 
     /// Opens the asset at the given path with the specified mode, returning nil if the asset was not found.
     public func open(from path: String, mode: AssetMode) -> Asset? {
+        #if !os(Android)
+        fatalError("only implemented for Android")
+        #else
         guard let handle = AAssetManager_open(self.assetManager, path, mode.assetMode) else {
             return nil
         }
         return Asset(handle: handle)
+        #endif
     }
 
     /// Attempt to read the entire contents from the asset with the given name.
@@ -56,25 +74,41 @@ public final class AndroidAssetManager : @unchecked Sendable {
         public func close() {
             if closed { return }
             closed = true
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             AAsset_close(handle)
+            #endif
         }
 
         /// Returns the total size of the asset data
         public var length: Int64 {
             assert(!closed, "asset is closed")
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             return AAsset_getLength64(handle)
+            #endif
         }
 
         /// Report the total amount of asset data that can be read from the current position
         public var remainingLength: Int64 {
             assert(!closed, "asset is closed")
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             return AAsset_getRemainingLength64(handle)
+            #endif
         }
 
         /// Returns whether this asset's internal buffer is allocated in ordinary RAM (i.e. not mmapped).
         public var isAllocated: Bool {
             assert(!closed, "asset is closed")
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             return AAsset_isAllocated(handle) != 0
+            #endif
         }
 
         /// Attempt to read 'count' bytes of data from the current offset.
@@ -86,7 +120,11 @@ public final class AndroidAssetManager : @unchecked Sendable {
             var data = Data(count: len)
 
             let bytesRead: Int32 = try data.withUnsafeMutableBytes { buffer in
+                #if !os(Android)
+                fatalError("only implemented for Android")
+                #else
                 AAsset_read(handle, buffer, len)
+                #endif
             }
 
             if bytesRead < 0 {
@@ -104,7 +142,11 @@ public final class AndroidAssetManager : @unchecked Sendable {
         /// Seek to the specified offset within the asset data.
         public func seek(offset: Int64, whence: AssetSeek) -> Int64 {
             assert(!closed, "asset is closed")
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             return AAsset_seek64(handle, offset, whence.seekMode)
+            #endif
         }
 
         /// Open a new file descriptor that can be used to read the asset data.
@@ -112,9 +154,13 @@ public final class AndroidAssetManager : @unchecked Sendable {
         /// Returns nil if direct fd access is not possible (for example, if the asset is compressed).
         public func openFileDescriptor(offset: inout Int64, outLength: inout Int64) -> Int32? {
             assert(!closed, "asset is closed")
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             let fd = AAsset_openFileDescriptor64(handle, &offset, &outLength)
             if fd < 0 { return nil }
             return fd
+            #endif
         }
     }
 
@@ -125,6 +171,9 @@ public final class AndroidAssetManager : @unchecked Sendable {
         case random
 
         var assetMode: Int32 {
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             switch self {
             case .buffer:
                 return Int32(AASSET_MODE_BUFFER)
@@ -133,6 +182,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
             case .random:
                 return Int32(AASSET_MODE_RANDOM)
             }
+            #endif
         }
     }
 
@@ -149,6 +199,9 @@ public final class AndroidAssetManager : @unchecked Sendable {
         case data
 
         var seekMode: Int32 {
+            #if !os(Android)
+            fatalError("only implemented for Android")
+            #else
             switch self {
             case .set: return Int32(SEEK_SET)
             case .cur: return Int32(SEEK_CUR)
@@ -156,8 +209,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
             case .hole: return Int32(SEEK_HOLE)
             case .data: return Int32(SEEK_DATA)
             }
+            #endif
         }
     }
 }
-
-#endif
