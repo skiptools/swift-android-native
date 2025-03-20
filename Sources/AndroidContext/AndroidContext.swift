@@ -7,6 +7,7 @@ import Foundation
 #if canImport(Android)
 import Android
 #endif
+@_exported import AndroidAssetManager
 import SwiftJNI
 
 /// A native reference to
@@ -66,6 +67,9 @@ public class AndroidContext : JObject {
     })
 
     private static let javaClass = try! JClass(name: "android/content/Context", systemClass: true)
+
+    /// The `AndroidAssetManager` for this context
+    public private(set) lazy var assetManager = JNI.jni.withEnv { _, env in AndroidAssetManager(env: env, peer: self.safePointer()) }
 
     /// Returns the package name for the current context
     public func getPackageName() throws -> String? {

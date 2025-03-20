@@ -30,6 +30,7 @@ let package = Package(
             "AndroidSystem",
         ]),
         .target(name: "AndroidAssetManager", dependencies: [
+            .product(name: "SwiftJNI", package: "swift-jni"),
             .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
         ]),
         .testTarget(name: "AndroidAssetManagerTests", dependencies: [
@@ -42,7 +43,7 @@ let package = Package(
             "AndroidLogging",
         ]),
         .target(name: "AndroidContext", dependencies: [
-            .product(name: "SwiftJNI", package: "swift-jni"),
+            "AndroidAssetManager",
             .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
         ]),
         .testTarget(name: "AndroidContextTests", dependencies: [
@@ -64,7 +65,6 @@ let package = Package(
             "AndroidChoreographer",
         ]),
         .target(name: "AndroidNative", dependencies: [
-            "AndroidAssetManager",
             "AndroidContext",
             "AndroidLogging",
             "AndroidLooper",

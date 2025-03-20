@@ -8,14 +8,15 @@ import AndroidNDK
 @available(iOS 14.0, *)
 class AndroidContextTests : XCTestCase {
     public func testAndroidContext() throws {
-        #if os(Android)
         throw XCTSkip("this test is only for demo purposes")
+        #if os(Android)
         let nativeActivity: ANativeActivity! = nil
         AndroidContext.contextPointer = nativeActivity.clazz
-        let context = try AndroidContext.application
-        #else
-        throw XCTSkip("this test only exists for Android targets")
         #endif
-
+        let context = try AndroidContext.application
+        let assetManager: AndroidAssetManager = context.assetManager
+        for item in assetManager.listAssets(inDirectory: "") ?? [] {
+            print("asset item: \(item)")
+        }
     }
 }
