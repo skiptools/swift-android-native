@@ -80,12 +80,15 @@ public struct Logger : @unchecked Sendable {
         __android_log_write(Int32(priority.rawValue), logTag, message)
     }
 }
+#endif
 
+#if canImport(os)
+@_exported import OSLog
+#else
 //extension OSLog.Category {
 //    public static let dynamicTracing: OSLog.Category
 //    public static let dynamicStackTracing: OSLog.Category
 //}
-
 public struct OSLogType : Equatable, RawRepresentable {
     public let rawValue: UInt8
 
@@ -105,8 +108,4 @@ extension OSLogType {
     public static let error: OSLogType = OSLogType(0x10)
     public static let fault: OSLogType = OSLogType(0x11)
 }
-
-#elseif canImport(os)
-@_exported import OSLog
 #endif
-
