@@ -1,6 +1,12 @@
 // Copyright 2025 Skip
-import Android
+#if canImport(FoundationEssentials)
 import FoundationEssentials
+#else
+import Foundation
+#endif
+#if canImport(Android)
+import Android
+#endif
 import SwiftJNI
 
 /// A native reference to
@@ -55,7 +61,7 @@ public class AndroidContext : JObject {
         guard let mth = cls.getStaticMethodID(name: contextMethod, sig: contextSig) else {
             throw ContextError(errorDescription: "Unable to find method \(contextMethod)")
         }
-        let ctx: jobject = try cls.callStatic(method: mth, options: [], args: [])
+        let ctx: JavaObjectPointer = try cls.callStatic(method: mth, options: [], args: [])
         return AndroidContext(ctx)
     })
 
@@ -72,56 +78,3 @@ public class AndroidContext : JObject {
         var errorDescription: String?
     }
 }
-
-//public final class JThrowable: JObject {
-//    private static let javaClass = try! JClass(name: "java/lang/Throwable", systemClass: true)
-//    private static let javaErrorExceptionClass = try! JClass(name: "skip/lib/ErrorException")
-//    private static let javaErrorExceptionConstructor = javaErrorExceptionClass.getMethodID(name: "<init>", sig: "(Ljava/lang/String;)V")!
-//    /// Handles converting the error pointer into the error that will ultimately be thrown
-//    public static var errorConverter: ((JavaObjectPointer, JConvertibleOptions) -> Error?) = { ptr, options in descriptionToError(ptr, options: options) }
-//
-//    public static func toError(_ ptr: JavaObjectPointer?, options: JConvertibleOptions) -> Error? {
-//        guard let ptr else {
-//            return nil
-//        }
-//        return errorConverter(ptr, options)
-//    }
-//
-//    public static func descriptionToError(_ ptr: JavaObjectPointer, options: JConvertibleOptions) -> ThrowableError {
-//        let str = try? String.call(toStringID, on: ptr, options: options, args: [])
-//        return ThrowableError(description: str ?? "A Java exception occurred, and an error was raised when trying to get the exception message")
-//    }
-//
-//    public static func toThrowable(_ error: (any Error)?, options: JConvertibleOptions) -> JavaObjectPointer? {
-//        guard let error else {
-//            return nil
-//        }
-//        guard let convertibleError = error as? JConvertible else {
-//            return descriptionToThrowable(error, options: options)
-//        }
-//        return convertibleError.toJavaObject(options: options)
-//    }
-//
-//    public static func descriptionToThrowable(_ error: any Error, options: JConvertibleOptions) -> JavaObjectPointer {
-//        // Note: It would be nice to keep JNI independent of some of the Skip-specific skip.lib.ErrorException, but
-//        // if we want to support compatibility with transpiled Swift we need to use Skip types
-//        let throwable = try! javaErrorExceptionClass.create(ctor: javaErrorExceptionConstructor, options: options, args: [String(describing: error).toJavaParameter(options: options)])
-//        return throwable
-//    }
-//
-//    /// Throw a Swift error to Kotlin.
-//    public static func `throw`(_ error: any Error, options: JConvertibleOptions, env: JNIEnvPointer) {
-//        let throwable = toThrowable(error, options: options)
-//        let jniEnv = env.pointee!.pointee
-//        let _ = jniEnv.Throw(env, throwable)
-//    }
-//
-//    public func getMessage() throws -> String? {
-//        try call(method: Self.getMessageID, options: [], args: [])
-//    }
-//    private static let getMessageID = javaClass.getMethodID(name: "getMessage", sig: "()Ljava/lang/String;")!
-//
-//    public func getLocalizedMessage() throws -> String? {
-//        try call(method: Self.getLocalizedMessageID, options: [], args: [])
-//    }
-//    private static let getLocalizedMessageID = javaClass.getMethodID(name: "getLocalizedMessage", sig: "()Ljava/lang/String;")!
