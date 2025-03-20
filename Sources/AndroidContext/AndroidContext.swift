@@ -6,6 +6,10 @@ import Foundation
 #endif
 #if canImport(Android)
 import Android
+#elseif canImport(Darwin)
+import func Darwin.getenv
+#elseif canImport(Glibc)
+import func Glibc.getenv
 #endif
 @_exported import AndroidAssetManager
 import SwiftJNI

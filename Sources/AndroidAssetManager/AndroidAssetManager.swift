@@ -13,7 +13,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
     
     /// Create the asset manager from the given JNI environment with a jobject pointer to the Java AssetManager.
     public init(env: UnsafeMutablePointer<JNIEnv?>, peer: JavaObjectPointer) {
-        #if !canImport(AndroidNDK)
+        #if !os(Android)
         fatalError("only implemented for Android")
         #else
         self.assetManager = AAssetManager_fromJava(env, peer)
@@ -22,7 +22,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
 
     /// List the file names for each asset in the specific directory
     public func listAssets(inDirectory directory: String) -> [String]? {
-        #if !canImport(AndroidNDK)
+        #if !os(Android)
         fatalError("only implemented for Android")
         #else
         guard let assetDir = AAssetManager_openDir(assetManager, directory) else { return nil }
@@ -38,7 +38,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
 
     /// Opens the asset at the given path with the specified mode, returning nil if the asset was not found.
     public func open(from path: String, mode: AssetMode) -> Asset? {
-        #if !canImport(AndroidNDK)
+        #if !os(Android)
         fatalError("only implemented for Android")
         #else
         guard let handle = AAssetManager_open(self.assetManager, path, mode.assetMode) else {
@@ -70,7 +70,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         public func close() {
             if closed { return }
             closed = true
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             AAsset_close(handle)
@@ -80,7 +80,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         /// Returns the total size of the asset data
         public var length: Int64 {
             assert(!closed, "asset is closed")
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             return AAsset_getLength64(handle)
@@ -90,7 +90,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         /// Report the total amount of asset data that can be read from the current position
         public var remainingLength: Int64 {
             assert(!closed, "asset is closed")
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             return AAsset_getRemainingLength64(handle)
@@ -100,7 +100,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         /// Returns whether this asset's internal buffer is allocated in ordinary RAM (i.e. not mmapped).
         public var isAllocated: Bool {
             assert(!closed, "asset is closed")
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             return AAsset_isAllocated(handle) != 0
@@ -116,7 +116,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
             var data = Data(count: len)
 
             let bytesRead: Int32 = try data.withUnsafeMutableBytes { buffer in
-                #if !canImport(AndroidNDK)
+                #if !os(Android)
                 fatalError("only implemented for Android")
                 #else
                 AAsset_read(handle, buffer, len)
@@ -138,7 +138,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         /// Seek to the specified offset within the asset data.
         public func seek(offset: Int64, whence: AssetSeek) -> Int64 {
             assert(!closed, "asset is closed")
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             return AAsset_seek64(handle, offset, whence.seekMode)
@@ -150,7 +150,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         /// Returns nil if direct fd access is not possible (for example, if the asset is compressed).
         public func openFileDescriptor(offset: inout Int64, outLength: inout Int64) -> Int32? {
             assert(!closed, "asset is closed")
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             let fd = AAsset_openFileDescriptor64(handle, &offset, &outLength)
@@ -167,7 +167,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         case random
 
         var assetMode: Int32 {
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             switch self {
@@ -195,7 +195,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
         case data
 
         var seekMode: Int32 {
-            #if !canImport(AndroidNDK)
+            #if !os(Android)
             fatalError("only implemented for Android")
             #else
             switch self {
