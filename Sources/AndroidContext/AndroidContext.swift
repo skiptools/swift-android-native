@@ -16,6 +16,10 @@ import SwiftJNI
 
 /// A native reference to
 /// [android.content.Context](https://developer.android.com/reference/android/content/Context)
+//@available(macOS, unavailable)
+@available(iOS, unavailable)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
 public class AndroidContext : JObject {
     /// The JNI signature for the method to invoke to obtain the global Context.
     /// This can be manually changed before initialization to a different signature.

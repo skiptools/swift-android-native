@@ -7,6 +7,10 @@ import SwiftJNI
 import Foundation
 
 /// https://developer.android.com/ndk/reference/group/asset
+//@available(macOS, unavailable)
+@available(iOS, unavailable)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
 public final class AndroidAssetManager : @unchecked Sendable {
     let assetManager: OpaquePointer // AAssetManager
     typealias AssetHandle = OpaquePointer

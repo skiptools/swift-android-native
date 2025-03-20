@@ -4,12 +4,12 @@ import PackageDescription
 let package = Package(
     name: "swift-android-native",
     products: [
-        .library(name: "AndroidNative", targets: ["AndroidNative"]),
-        .library(name: "AndroidContext", targets: ["AndroidContext"]),
-        .library(name: "AndroidAssetManager", targets: ["AndroidAssetManager"]),
-        .library(name: "AndroidLogging", targets: ["AndroidLogging"]),
-        .library(name: "AndroidLooper", targets: ["AndroidLooper"]),
-        .library(name: "AndroidChoreographer", targets: ["AndroidLooper"]),
+        .library(name: "AndroidNative", type: .dynamic, targets: ["AndroidNative"]),
+        .library(name: "AndroidContext", type: .dynamic, targets: ["AndroidContext"]),
+        .library(name: "AndroidAssetManager", type: .dynamic, targets: ["AndroidAssetManager"]),
+        .library(name: "AndroidLogging", type: .dynamic, targets: ["AndroidLogging"]),
+        .library(name: "AndroidLooper", type: .dynamic, targets: ["AndroidLooper"]),
+        .library(name: "AndroidChoreographer", type: .dynamic, targets: ["AndroidLooper"]),
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/swift-jni.git", "0.0.0"..<"2.0.0"),
