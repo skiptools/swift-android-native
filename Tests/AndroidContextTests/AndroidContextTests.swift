@@ -5,7 +5,9 @@ import SwiftJNI
 import AndroidNDK
 #endif
 
-@available(iOS 14.0, *)
+@available(iOS, unavailable)
+@available(tvOS, unavailable)
+@available(watchOS, unavailable)
 class AndroidContextTests : XCTestCase {
     public func testAndroidContext() throws {
         throw XCTSkip("this test is only for demo purposes")
