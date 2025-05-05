@@ -1,12 +1,13 @@
 # Android Native
 
 This package provides a Swift interface to various
-Android [NDK APIs](https://developer.android.com/ndk/reference).
+Android [NDK APIs](https://developer.android.com/ndk/reference)
+and utilities to integrate Swift Foundation with the Android environment.
 
 ## Requirements
 
-- Swift 5.9
-- [Swift Android SDK](https://github.com/finagolfin/swift-android-sdk)
+- Swift 6
+- [Swift Android Toolchain and SDK](https://github.com/skiptools/swift-android-toolchain)
 
 ## Installation
 
@@ -192,6 +193,28 @@ Add the `AndroidLooper` module as a conditional dependency for any targets that 
 ])
 ```
 
+# AndroidBootstrap
+
+The [AndroidBootstrap] class is part of the top-level [AndroidNative] module, and provides
+some conveniences for configuring Android to work with other Foundation types.
+
+## Networking
+
+Foundation's `URLSession` cannot load "https" URLs out of the box on Android because it
+doesn't know where to look to find the local certificate authority files. In order to
+set up `URLSession` properly, first call `AndroidBootstrap.setupCACerts()` one time
+in order to initialize the certificate bundle.
+
+For example:
+
+```swift
+import FoundationNetworking
+import AndroidNative
+
+try AndroidBootstrap.setupCACerts() // needed in order to use https
+let url = URL(string: "https://httpbin.org/get?x=1")!
+let (data, response) = try await URLSession.shared.data(from: url)
+```
 
 # License
 

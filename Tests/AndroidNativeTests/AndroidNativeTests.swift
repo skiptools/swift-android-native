@@ -1,7 +1,38 @@
 import XCTest
 import AndroidNative
+#if canImport(FoundationNetworking)
+import FoundationEssentials
+import FoundationNetworking
+#else
+import Foundation
+#endif
 
 class AndroidNativeTests : XCTestCase {
+    public func testNetwork() async throws {
+        struct HTTPGetResponse : Decodable {
+            var args: [String: String]
+            var headers: [String: String]
+            var origin: String?
+            var url: String?
+        }
+        try AndroidBootstrap.setupCACerts() // needed in order to use https
+        let url = URL(string: "https://httpbin.org/get?x=1")!
+        let (data, response) = try await URLSession.shared.data(from: url)
+        let statusCode = (response as? HTTPURLResponse)?.statusCode
+        if statusCode != 200 {
+            // do not fail the test just because httpbin.org is unavailable
+            throw XCTSkip("tolerating bad status code: \(statusCode ?? 0) for url: \(url.absoluteString)")
+        }
+        XCTAssertEqual(200, statusCode)
+        let get = try JSONDecoder().decode(HTTPGetResponse.self, from: data)
+        XCTAssertEqual(get.url, url.absoluteString)
+        XCTAssertEqual(get.args["x"], "1")
+    }
+
+    public func testEmbedInCodeResource() async throws {
+        XCTAssertEqual("Hello Android!\n", String(data: Data(PackageResources.sample_resource_txt), encoding: .utf8) ?? "")
+    }
+
     @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
     public func testMainActor() async {
         let actorDemo = await MainActorDemo()
