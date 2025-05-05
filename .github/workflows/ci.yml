@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: "Test Swift Package Locally"
+      - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
@@ -24,8 +24,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: "Test Swift Package Locally"
+      - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"
-        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
+        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 16" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
 
