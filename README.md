@@ -208,10 +208,15 @@ in order to initialize the certificate bundle.
 For example:
 
 ```swift
-import FoundationNetworking
+import Foundation
+#if os(Android)
 import AndroidNative
+import FoundationNetworking
+#endif
 
+#if os(Android)
 try AndroidBootstrap.setupCACerts() // needed in order to use https
+#endif
 let url = URL(string: "https://httpbin.org/get?x=1")!
 let (data, response) = try await URLSession.shared.data(from: url)
 ```

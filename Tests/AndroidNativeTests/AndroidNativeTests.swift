@@ -15,7 +15,9 @@ class AndroidNativeTests : XCTestCase {
             var origin: String?
             var url: String?
         }
+        #if os(Android)
         try AndroidBootstrap.setupCACerts() // needed in order to use https
+        #endif
         let url = URL(string: "https://httpbin.org/get?x=1")!
         let (data, response) = try await URLSession.shared.data(from: url)
         let statusCode = (response as? HTTPURLResponse)?.statusCode
