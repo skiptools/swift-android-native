@@ -24,8 +24,11 @@ public class AndroidBootstrap {
             return
         }
 
-        //let cacheFolder = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true) // file:////.cache/ (unwritable)
-        let cacheFolder = URL.temporaryDirectory
+        var cacheFolder = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        var cacheFolderIsDir: Bool = false
+        if !FileManager.default.fileExists(atPath: cacheFolder.path, isDirectory: &cacheFolderIsDir) || !cacheFolderIsDir {
+            cacheFolder = URL.temporaryDirectory
+        }
         //logger.debug("setupCACerts: \(cacheFolder)")
         let generatedCacertsURL = cacheFolder.appendingPathComponent("cacerts-aggregate.pem")
         //logger.debug("setupCACerts: generatedCacertsURL=\(generatedCacertsURL)")
