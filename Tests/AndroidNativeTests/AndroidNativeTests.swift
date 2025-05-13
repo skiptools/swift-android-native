@@ -7,6 +7,7 @@ import FoundationNetworking
 import Foundation
 #endif
 
+@available(iOS 14.0, *)
 class AndroidNativeTests : XCTestCase {
     public func testNetwork() async throws {
         struct HTTPGetResponse : Decodable {

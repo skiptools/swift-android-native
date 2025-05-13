@@ -43,7 +43,7 @@ jobs:
       - name: "Test Swift Package on Android (Skip)"
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 28
           arch: x86_64
           script: ANDROID_NDK_ROOT="" skip android test --verbose
       - name: "Test Swift Package on macOS"

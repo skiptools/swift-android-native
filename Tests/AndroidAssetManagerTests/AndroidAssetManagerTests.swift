@@ -1,8 +1,6 @@
 import XCTest
 
-@available(iOS, unavailable)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
+@available(iOS 14.0, *)
 class AndroidAssetManagerTests : XCTestCase {
     public func testAssetManager() async throws {
     }
