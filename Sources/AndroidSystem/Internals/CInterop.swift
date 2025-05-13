@@ -18,7 +18,6 @@ import Musl
 #elseif canImport(WASILibc)
 import WASILibc
 #elseif canImport(Android)
-@_exported import SwiftAndroid
 @_implementationOnly import AndroidNDK
 import Android
 #else
