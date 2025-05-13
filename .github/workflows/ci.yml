@@ -34,17 +34,17 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: "Build Swift Package with Skip Android"
+      - name: "Build Swift Package for Android (Skip)"
         run: |
           brew install skiptools/skip/skip
           skip android sdk install --version ${{ matrix.swift }}
           # https://github.com/swiftlang/swift-driver/pull/1879
-          ANDROID_NDK_ROOT="" skip android build
-      - name: "Test Swift Package with Skip Android"
+          ANDROID_NDK_ROOT="" skip android build --build-tests
+      - name: "Test Swift Package on Android (Skip)"
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
-          script: ANDROID_NDK_ROOT="" skip android test
+          script: skip android test --verbose
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"
