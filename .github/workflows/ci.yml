@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: "Build Swift Package for Android (Skip)"
         run: |
-          brew install skiptools/skip/skip
+          brew install skiptools/skip/skip || (brew update && brew install skiptools/skip/skip)
           skip android sdk install --version ${{ matrix.swift }}
           # https://github.com/swiftlang/swift-driver/pull/1879
           ANDROID_NDK_ROOT="" skip android build --build-tests
