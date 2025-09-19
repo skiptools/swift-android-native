@@ -26,20 +26,14 @@ jobs:
           swift-version: ${{ matrix.swift }}
 
   macos-ios:
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         - os: 'macos-26'
           swift: '6.2'
           arch: 'arm64-v8a'
-        - os: 'macos-13'
-          swift: '6.1'
-          arch: 'x86_64'
-        - os: 'macos-13'
-          swift: '6.2'
-          arch: 'x86_64'
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: "Build Swift Package for Android (Skip)"
