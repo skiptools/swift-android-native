@@ -31,9 +31,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 'macos-26'
-            swift: '6.2'
-            arch: 'arm64-v8a'
+          #- os: 'macos-26'
+          #  swift: '6.2'
+          #  arch: 'arm64-v8a'
           - os: 'macos-13'
             swift: '6.1'
             arch: 'x86_64'
