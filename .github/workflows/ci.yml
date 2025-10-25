@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ['6.1', '6.2']
+        swift: ['6.1', '6.2', 'nightly-main']
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -21,7 +21,8 @@ jobs:
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
-        uses: skiptools/swift-android-action@v2
+        #uses: skiptools/swift-android-action@v2
+        uses: skiptools/swift-android-action@main
         with:
           swift-version: ${{ matrix.swift }}
 
