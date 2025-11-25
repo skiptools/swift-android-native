@@ -59,7 +59,7 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
 
         _mainLooper = ALooper_forThread()
         if _mainLooper == nil {
-            // this happens sometimes when running in test cases
+            // this happens sometimes when running in test cases, perhaps because setup is not being called from the main thread
             logger.debug("setupMainLooper: ALooper_forThread: no looper found for thread")
             return false
         }
