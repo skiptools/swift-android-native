@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ['6.1', '6.2', 'nightly-main']
+        swift: ['6.1', '6.2', 'nightly-6.3', 'nightly-main']
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
