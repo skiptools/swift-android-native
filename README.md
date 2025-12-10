@@ -1,4 +1,4 @@
-# Android Native
+# SwiftAndroidNative
 
 This package provides a Swift interface to various
 Android [NDK APIs](https://developer.android.com/ndk/reference)
