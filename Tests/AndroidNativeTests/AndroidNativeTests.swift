@@ -46,7 +46,7 @@ class AndroidNativeTests : XCTestCase {
                     throw error
                 }
                 // exponential backoff before retrying
-                try await Task.sleep(nanoseconds: UInt64(2 + (retry * retry)) * NSEC_PER_SEC)
+                try await Task.sleep(nanoseconds: UInt64(2 + (retry * retry)) * 1_000_000_000)
             }
         }
     }
