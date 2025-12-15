@@ -10,15 +10,16 @@ import Foundation
 @available(iOS 14.0, *)
 class AndroidNativeTests : XCTestCase {
     public func testNetwork() async throws {
+        #if os(Android)
+        try AndroidBootstrap.setupCACerts() // needed in order to use https
+        #endif
+
         /// https://www.swift.org/openapi/openapi.html#/Toolchains/listReleases
         struct SwiftReleasesResponse : Decodable {
             var name: String
             var date: String?
             var tag: String?
         }
-        #if os(Android)
-        try AndroidBootstrap.setupCACerts() // needed in order to use https
-        #endif
 
         // retry a few times in case of hiccups
         try await retry(count: 5) {
@@ -31,7 +32,7 @@ class AndroidNativeTests : XCTestCase {
             }
             XCTAssertEqual(200, statusCode)
             let get = try JSONDecoder().decode([SwiftReleasesResponse].self, from: data)
-            XCTAssertGreaterThan(0, get.count)
+            XCTAssertGreaterThan(get.count, 0)
         }
     }
     
