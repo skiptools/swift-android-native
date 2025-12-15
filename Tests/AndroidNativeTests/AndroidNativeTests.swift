@@ -10,26 +10,45 @@ import Foundation
 @available(iOS 14.0, *)
 class AndroidNativeTests : XCTestCase {
     public func testNetwork() async throws {
-        struct HTTPGetResponse : Decodable {
-            var args: [String: String]
-            var headers: [String: String]
-            var origin: String?
-            var url: String?
+        /// https://www.swift.org/openapi/openapi.html#/Toolchains/listReleases
+        struct SwiftReleasesResponse : Decodable {
+            var name: String
+            var date: String?
+            var tag: String?
         }
         #if os(Android)
         try AndroidBootstrap.setupCACerts() // needed in order to use https
         #endif
-        let url = URL(string: "https://httpbin.org/get?x=1")!
-        let (data, response) = try await URLSession.shared.data(from: url)
-        let statusCode = (response as? HTTPURLResponse)?.statusCode
-        if statusCode != 200 {
-            // do not fail the test just because httpbin.org is unavailable
-            throw XCTSkip("tolerating bad status code: \(statusCode ?? 0) for url: \(url.absoluteString)")
+
+        // retry a few times in case of hiccups
+        try await retry(count: 5) {
+            let url = URL(string: "https://www.swift.org/api/v1/install/releases.json")!
+            let (data, response) = try await URLSession.shared.data(from: url)
+            let statusCode = (response as? HTTPURLResponse)?.statusCode
+            if statusCode != 200 {
+                // throw with bad error so we retry
+                throw XCTSkip("bad status code: \(statusCode ?? 0) for url: \(url.absoluteString)")
+            }
+            XCTAssertEqual(200, statusCode)
+            let get = try JSONDecoder().decode([SwiftReleasesResponse].self, from: data)
+            XCTAssertGreaterThan(0, get.count)
         }
-        XCTAssertEqual(200, statusCode)
-        let get = try JSONDecoder().decode(HTTPGetResponse.self, from: data)
-        XCTAssertEqual(get.url, url.absoluteString)
-        XCTAssertEqual(get.args["x"], "1")
+    }
+    
+    /// Retries the given block with an exponential backoff in between attempts.
+    func retry(count retryCount: Int, block: () async throws -> ()) async throws {
+        for retry in 1...retryCount {
+            do {
+                try await block()
+                return // success: do not continue retrying
+            } catch {
+                if retry == retryCount {
+                    throw error
+                }
+                // exponential backoff before retrying
+                try await Task.sleep(nanoseconds: UInt64(2 + (retry * retry)) * NSEC_PER_SEC)
+            }
+        }
     }
 
     public func testEmbedInCodeResource() async throws {
