@@ -22,7 +22,7 @@ jobs:
         with:
           tool-cache: false
           android: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
@@ -48,7 +48,7 @@ jobs:
             arch: 'x86_64'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Build Swift Package for Android (Skip)"
         run: |
           brew install skiptools/skip/skip || (brew update && brew install skiptools/skip/skip)
