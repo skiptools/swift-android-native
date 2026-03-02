@@ -40,6 +40,9 @@ jobs:
           # add skip local runner to path
           echo "${PWD}/scripts" >> $GITHUB_PATH
 
+      - name: "Setup Homebrew"
+        uses: Homebrew/actions/setup-homebrew@main
+
       - name: "Install swiftly"
         run: |
           brew install swiftly
