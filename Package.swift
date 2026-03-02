@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "swift-android-native",
+    platforms: [.iOS(.v17), .macOS(.v14), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17)],
     products: [
         .library(name: "AndroidNative", targets: ["AndroidNative"]),
         .library(name: "AndroidContext", targets: ["AndroidContext"]),
