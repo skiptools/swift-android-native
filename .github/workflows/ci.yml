@@ -40,6 +40,11 @@ jobs:
           # add skip local runner to path
           echo "${PWD}/scripts" >> $GITHUB_PATH
 
+      - name: "Install swiftly"
+        run: |
+          brew install swiftly
+          swiftly init --skip-install --assume-yes --quiet-shell-followup
+
       - name: "Install Swift SDK for Android"
         run: |
           skip android sdk install --verbose --version ${{ matrix.swift }}
