@@ -16,6 +16,10 @@ jobs:
       matrix:
         os: ['macos-15-intel', 'ubuntu-latest']
         swift: ['6.2.3', 'nightly-6.3', 'nightly-main']
+        exclude:
+          - os: 'ubuntu-latest'
+            swift: '6.2.3'
+
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
@@ -42,6 +46,11 @@ jobs:
 
       - name: "Setup Homebrew"
         uses: Homebrew/actions/setup-homebrew@main
+
+      - name: "Install Host Toolchain prerequisites"
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get -y install libcurl4-openssl-dev || (sudo apt-get update && sudo apt-get -y install libcurl4-openssl-dev)
 
       - name: "Install swiftly"
         run: |
