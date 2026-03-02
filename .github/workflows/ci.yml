@@ -47,7 +47,6 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
-          arch: ${{ matrix.arch }}
           script: ANDROID_NDK_ROOT="" skip android test --apk --verbose
       - name: "Test Swift Package on host OS"
         run: swift test
