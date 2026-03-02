@@ -50,17 +50,35 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: "Build Swift Package for Android (Skip)"
+        # Use a source build of skipstone until we have a release that includes
+        # https://github.com/skiptools/skipstone/pull/199
+        if: false
         run: |
           brew install skiptools/skip/skip || (brew update && brew install skiptools/skip/skip)
           skip android sdk install --verbose --version ${{ matrix.swift }}
           # https://github.com/swiftlang/swift-driver/pull/1879
           ANDROID_NDK_ROOT="" skip android build --build-tests
+
+      - name: Checkout skipstone
+        uses: actions/checkout@v6
+        with:
+          repository: skiptools/skipstone
+          path: skipstone
+          ref: main
+          submodules: true
+      - name: Build skipstone
+        working-directory: skipstone
+        run: |
+          swift build SkipRunner
+          # add skip local runner to path
+          echo "${PWD}/scripts" >> $GITHUB_PATH
+
       - name: "Test Swift Package on Android (Skip)"
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
           arch: ${{ matrix.arch }}
-          script: ANDROID_NDK_ROOT="" skip android test --verbose
+          script: ANDROID_NDK_ROOT="" skip android test --apk --verbose
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"

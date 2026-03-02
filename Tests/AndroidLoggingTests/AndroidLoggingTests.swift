@@ -1,9 +1,8 @@
-import XCTest
+import Testing
 import AndroidLogging // note: on non-android platforms, this will just export the system OSLog
 
-@available(iOS 14.0, *)
-class AndroidLoggingTests : XCTestCase {
-    public func testOSLogAPI() {
+struct AndroidLoggingTests {
+    @Test func testOSLogAPI() {
         let emptyLogger = Logger()
         emptyLogger.info("Android logger test: empty message")
 
