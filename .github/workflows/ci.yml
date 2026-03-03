@@ -17,6 +17,7 @@ jobs:
         os: ['macos-15-intel', 'ubuntu-latest']
         swift: ['6.2.3', 'nightly-6.3', 'nightly-main']
         exclude:
+          # Swift Android SDK 6.2.3 unavailable for Linux
           - os: 'ubuntu-latest'
             swift: '6.2.3'
 
@@ -66,7 +67,7 @@ jobs:
       - name: "Build package for Android"
         run: skip android build --build-tests
 
-      - name: "Test Swift Package on Android (Skip)"
+      - name: "Test Swift Package on Android"
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
