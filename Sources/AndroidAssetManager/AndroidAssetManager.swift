@@ -119,7 +119,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
             let len = size ?? Int(self.length)
             var data = Data(count: len)
 
-            let bytesRead: Int32 = try data.withUnsafeMutableBytes { buffer in
+            let bytesRead: Int32 = data.withUnsafeMutableBytes { buffer in
                 #if !os(Android)
                 fatalError("only implemented for Android")
                 #else
