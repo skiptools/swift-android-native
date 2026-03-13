@@ -76,8 +76,8 @@ let package = Package(
         .testTarget(name: "AndroidNativeTests", dependencies: [
             "AndroidNative",
         ], resources: [.embedInCode("Resources/sample_resource.txt")]),
-    ],
-    swiftLanguageModes: [.v5]
+    ]
+    //swiftLanguageModes: [.v5]
 )
 
 if android {
