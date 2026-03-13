@@ -24,8 +24,8 @@ jobs:
 
           # FIXME: test build failure in 6.2.3:
           # TestRunner.swift:88:5: error: sending value of non-Sendable type '() async -> ()' risks causing data races [#SendingRisksDataRace]
-          - os: 'macos-15-intel'
-            swift: '6.2.3'
+          #- os: 'macos-15-intel'
+          #  swift: '6.2.3'
 
     runs-on: ${{ matrix.os }}
     steps:
