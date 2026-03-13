@@ -1,8 +1,11 @@
 // swift-tools-version: 5.9
 import PackageDescription
 
+let android = Context.environment["TARGET_OS_ANDROID"] ?? "0" != "0"
+
 let package = Package(
     name: "swift-android-native",
+    platforms: [.iOS(.v17), .macOS(.v14), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17)],
     products: [
         .library(name: "AndroidNative", targets: ["AndroidNative"]),
         .library(name: "AndroidContext", targets: ["AndroidContext"]),
@@ -73,5 +76,12 @@ let package = Package(
         .testTarget(name: "AndroidNativeTests", dependencies: [
             "AndroidNative",
         ], resources: [.embedInCode("Resources/sample_resource.txt")]),
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )
+
+if android {
+    // add compatibility import from OSLog to AndroidLogging
+    package.targets += [.target(name: "OSLog", dependencies: ["AndroidLogging"])]
+}
+

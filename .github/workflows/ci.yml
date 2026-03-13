@@ -9,60 +9,60 @@ on:
   schedule:
     - cron:  '45 2,13 * * *'
 jobs:
-  linux-android:
-    strategy:
-      fail-fast: false
-      matrix:
-        swift: ['6.1', '6.2', 'nightly-6.3', 'nightly-main']
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          android: false
-      - uses: actions/checkout@v6
-      - name: "Test Swift Package on Linux"
-        run: swift test
-      - name: "Test Swift Package on Android"
-        #uses: skiptools/swift-android-action@v2
-        uses: skiptools/swift-android-action@main
-        with:
-          swift-version: ${{ matrix.swift }}
-
-  macos-ios:
+  ci:
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        include:
-          #- os: 'macos-26'
-          #  swift: '6.2'
-          #  arch: 'arm64-v8a'
-          - os: 'macos-15-intel'
-            swift: '6.1'
-            arch: 'x86_64'
-          - os: 'macos-15-intel'
-            swift: '6.2'
-            arch: 'x86_64'
+        os: ['macos-15-intel', 'ubuntu-latest']
+        swift: ['6.2.3', 'nightly-6.3', 'nightly-main']
+        android-api: ['28']
+        exclude:
+          # Swift Android SDK 6.2.3 unavailable for Linux
+          - os: 'ubuntu-latest'
+            swift: '6.2.3'
+
+          # FIXME: test build failure in 6.2.3:
+          # TestRunner.swift:88:5: error: sending value of non-Sendable type '() async -> ()' risks causing data races [#SendingRisksDataRace]
+          #- os: 'macos-15-intel'
+          #  swift: '6.2.3'
+
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - name: "Setup Homebrew"
+        uses: Homebrew/actions/setup-homebrew@main
+
       - name: "Build Swift Package for Android (Skip)"
         run: |
           brew install skiptools/skip/skip || (brew update && brew install skiptools/skip/skip)
+
+      - name: "Install Host Toolchain prerequisites"
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get -y install libcurl4-openssl-dev || (sudo apt-get update && sudo apt-get -y install libcurl4-openssl-dev)
+
+      - name: "Install Swift SDK for Android"
+        run: |
+          # need swiftly init on Linux
+          swiftly init --assume-yes --no-modify-profile --skip-install
           skip android sdk install --verbose --version ${{ matrix.swift }}
           # https://github.com/swiftlang/swift-driver/pull/1879
-          ANDROID_NDK_ROOT="" skip android build --build-tests
-      - name: "Test Swift Package on Android (Skip)"
+          echo "ANDROID_NDK_ROOT=" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v6
+
+      - name: "Build package for Android"
+        run: skip android build --build-tests
+
+      - name: "Test Swift Package on Android"
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 28
-          arch: ${{ matrix.arch }}
-          script: ANDROID_NDK_ROOT="" skip android test --verbose
-      - name: "Test Swift Package on macOS"
+          api-level: ${{ matrix.android-api }}
+          arch: x86_64
+          script: skip android test --apk --verbose
+      - name: "Test Swift Package on host OS"
         run: swift test
       - name: "Test Swift Package on iOS"
-        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 17" -scheme "$(xcodebuild -list -json | jq -r '.workspace.schemes[-1]')"
+        if: runner.os == 'macOS'
+        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 17" -scheme swift-android-native-Package
 

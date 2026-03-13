@@ -1,14 +1,13 @@
-import XCTest
+import Testing
 import AndroidLooper
 
-@available(iOS 14.0, *)
-class AndroidLooperTests : XCTestCase {
-    override func setUp() {
+struct AndroidLooperTests {
+    init() {
         #if os(Android)
         //AndroidLooper_initialize(nil)
         #endif
     }
 
-    public func testLooper() async throws {
+    @Test func testLooper() async throws {
     }
 }

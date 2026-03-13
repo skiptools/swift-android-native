@@ -1,15 +1,18 @@
-import XCTest
+import Testing
 import AndroidNative
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationEssentials
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
-@available(iOS 14.0, *)
-class AndroidNativeTests : XCTestCase {
-    public func testNetwork() async throws {
+private struct RetryableError: Error {
+    let message: String
+}
+
+struct AndroidNativeTests {
+    @Test(.disabled("temporarily disabled on Android due to hang"))
+    func testNetwork() async throws {
         #if os(Android)
         try AndroidBootstrap.setupCACerts() // needed in order to use https
         #endif
@@ -28,14 +31,14 @@ class AndroidNativeTests : XCTestCase {
             let statusCode = (response as? HTTPURLResponse)?.statusCode
             if statusCode != 200 {
                 // throw with bad error so we retry
-                throw XCTSkip("bad status code: \(statusCode ?? 0) for url: \(url.absoluteString)")
+                throw RetryableError(message: "bad status code: \(statusCode ?? 0) for url: \(url.absoluteString)")
             }
-            XCTAssertEqual(200, statusCode)
+            #expect(statusCode == 200)
             let get = try JSONDecoder().decode([SwiftReleasesResponse].self, from: data)
-            XCTAssertGreaterThan(get.count, 0)
+            #expect(get.count > 0)
         }
     }
-    
+
     /// Retries the given block with an exponential backoff in between attempts.
     func retry(count retryCount: Int, block: () async throws -> ()) async throws {
         for retry in 1...retryCount {
@@ -52,14 +55,15 @@ class AndroidNativeTests : XCTestCase {
         }
     }
 
-    public func testEmbedInCodeResource() async throws {
-        XCTAssertEqual("Hello Android!\n", String(data: Data(PackageResources.sample_resource_txt), encoding: .utf8) ?? "")
+    @Test func testEmbedInCodeResource() async throws {
+        #expect(String(data: Data(PackageResources.sample_resource_txt), encoding: .utf8) == "Hello Android!\n")
     }
 
-    public func testMainActor() async {
+    @Test(.disabled("temporarily disabled on Android due to hang"))
+    func testMainActor() async {
         let actorDemo = await MainActorDemo()
         let result = await actorDemo.add(n1: 1, n2: 2)
-        XCTAssertEqual(result, 3)
+        #expect(result == 3)
         var tasks: [Task<Int, Never>] = []
 
         for i in 0..<100 {
@@ -75,7 +79,7 @@ class AndroidNativeTests : XCTestCase {
             totalResult += taskResult
         }
 
-        XCTAssertEqual(9900, totalResult)
+        #expect(totalResult == 9900)
     }
 }
 

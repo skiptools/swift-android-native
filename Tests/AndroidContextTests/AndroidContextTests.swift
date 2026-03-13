@@ -1,16 +1,15 @@
-import XCTest
+import Testing
 import AndroidContext
 import SwiftJNI
 #if os(Android)
 import AndroidNDK
 #endif
 
-@available(iOS, unavailable)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
-class AndroidContextTests : XCTestCase {
-    public func testAndroidContext() throws {
-        throw XCTSkip("this test is only for demo purposes")
+#if !os(iOS)
+struct AndroidContextTests {
+    // TODO: activate these tests now that we have `skip android test --apk` and can access the JNI context
+    @Test(.disabled("this test is only for demo purposes"))
+    func testAndroidContext() throws {
         #if os(Android)
         let nativeActivity: ANativeActivity! = nil
         AndroidContext.contextPointer = nativeActivity.clazz
@@ -22,3 +21,4 @@ class AndroidContextTests : XCTestCase {
         }
     }
 }
+#endif
