@@ -5,6 +5,7 @@ import SwiftJNI
 import AndroidNDK
 #endif
 
+#if !os(iOS)
 struct AndroidContextTests {
     // TODO: activate these tests now that we have `skip android test --apk` and can access the JNI context
     @Test(.disabled("this test is only for demo purposes"))
@@ -20,3 +21,4 @@ struct AndroidContextTests {
         }
     }
 }
+#endif

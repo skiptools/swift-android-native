@@ -36,11 +36,6 @@ jobs:
         run: |
           sudo apt-get -y install libcurl4-openssl-dev || (sudo apt-get update && sudo apt-get -y install libcurl4-openssl-dev)
 
-      - name: "Install swiftly"
-        run: |
-          brew install swiftly
-          swiftly init --skip-install --assume-yes --quiet-shell-followup
-
       - name: "Install Swift SDK for Android"
         run: |
           skip android sdk install --verbose --version ${{ matrix.swift }}
@@ -58,7 +53,6 @@ jobs:
       - name: "Test Swift Package on host OS"
         run: swift test
       - name: "Test Swift Package on iOS"
-        #if: runner.os == 'macOS'
-        if: false
+        if: runner.os == 'macOS'
         run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 17" -scheme swift-android-native-Package
 
