@@ -23,7 +23,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - name: "Setup Homebrew"
+        uses: Homebrew/actions/setup-homebrew@main
+
       - name: "Build Swift Package for Android (Skip)"
         run: |
           brew install skiptools/skip/skip || (brew update && brew install skiptools/skip/skip)
@@ -33,14 +35,13 @@ jobs:
         run: |
           sudo apt-get -y install libcurl4-openssl-dev || (sudo apt-get update && sudo apt-get -y install libcurl4-openssl-dev)
 
-      - name: "Setup Homebrew"
-        uses: Homebrew/actions/setup-homebrew@main
-
       - name: "Install Swift SDK for Android"
         run: |
           skip android sdk install --verbose --version ${{ matrix.swift }}
           # https://github.com/swiftlang/swift-driver/pull/1879
           echo "ANDROID_NDK_ROOT=" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v6
 
       - name: "Build package for Android"
         run: skip android build --build-tests
