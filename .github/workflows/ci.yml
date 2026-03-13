@@ -25,25 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: "Build Swift Package for Android (Skip)"
-        # Use a source build of skipstone until we have a release that includes
-        # https://github.com/skiptools/skipstone/pull/199
-        if: false
         run: |
           brew install skiptools/skip/skip || (brew update && brew install skiptools/skip/skip)
-
-      - name: Checkout skipstone
-        uses: actions/checkout@v6
-        with:
-          repository: skiptools/skipstone
-          path: skipstone
-          ref: main
-          submodules: true
-      - name: Build skipstone
-        working-directory: skipstone
-        run: |
-          swift build --product SkipRunner
-          # add skip local runner to path
-          echo "${PWD}/scripts" >> $GITHUB_PATH
 
       - name: "Setup Homebrew"
         uses: Homebrew/actions/setup-homebrew@main

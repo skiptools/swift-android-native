@@ -1,6 +1,8 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
+let android = Context.environment["TARGET_OS_ANDROID"] ?? "0" != "0"
+
 let package = Package(
     name: "swift-android-native",
     platforms: [.iOS(.v17), .macOS(.v14), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17)],
@@ -77,3 +79,9 @@ let package = Package(
     ],
     swiftLanguageModes: [.v5]
 )
+
+if android {
+    // add compatibility import from OSLog to AndroidLogging
+    package.targets += [.target(name: "OSLog", dependencies: ["AndroidLogging"])]
+}
+
