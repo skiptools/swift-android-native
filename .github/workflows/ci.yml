@@ -16,6 +16,7 @@ jobs:
       matrix:
         os: ['macos-15-intel', 'ubuntu-latest']
         swift: ['6.2.3', 'nightly-6.3', 'nightly-main']
+        android-api: ['28']
         exclude:
           # Swift Android SDK 6.2.3 unavailable for Linux
           - os: 'ubuntu-latest'
@@ -37,6 +38,8 @@ jobs:
 
       - name: "Install Swift SDK for Android"
         run: |
+          # need swiftly init on Linux
+          swiftly init --assume-yes --no-modify-profile --skip-install
           skip android sdk install --verbose --version ${{ matrix.swift }}
           # https://github.com/swiftlang/swift-driver/pull/1879
           echo "ANDROID_NDK_ROOT=" >> $GITHUB_ENV
@@ -49,7 +52,7 @@ jobs:
       - name: "Test Swift Package on Android"
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 28
+          api-level: ${{ matrix.android-api }}
           arch: x86_64
           script: skip android test --apk --verbose
       - name: "Test Swift Package on host OS"
