@@ -7,7 +7,11 @@
 
 #if canImport(Android)
 import Android
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// Utilities for setting up Android compatibility with Foundation
 public class AndroidBootstrap {
@@ -29,21 +33,17 @@ public class AndroidBootstrap {
         // get a list of all the certificate URLs
         var certURLs: [URL] = []
         for certsFolder in certsFolders {
-            let certsFolderURL = URL(fileURLWithPath: certsFolder)
-            if (try? certsFolderURL.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) != true { continue }
-            let certFolderURLs = try FileManager.default.contentsOfDirectory(at: certsFolderURL, includingPropertiesForKeys: [.isRegularFileKey, .isReadableKey, .fileSizeKey, .contentModificationDateKey])
-            for certURL in certFolderURLs {
+            guard let fileNames = try? FileManager.default.contentsOfDirectory(atPath: certsFolder) else { continue }
+            for fileName in fileNames {
+                let certPath = certsFolder + "/" + fileName
+                let certURL = URL(fileURLWithPath: certPath)
                 //logger.debug("setupCACerts: certURL=\(certURL)")
                 // certificate files have names like "53a1b57a.0"
                 if certURL.pathExtension != "0" { continue }
-                do {
-                    if try certURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == false { continue }
-                    if try certURL.resourceValues(forKeys: [.isReadableKey]).isReadable == false { continue }
-                    certURLs.append(certURL)
-                } catch {
-                    //logger.warning("setupCACerts: error reading certificate file \(certURL.path): \(error)")
-                    continue
-                }
+                var isDir: Bool = false
+                guard FileManager.default.fileExists(atPath: certPath, isDirectory: &isDir), !isDir else { continue }
+                guard FileManager.default.isReadableFile(atPath: certPath) else { continue }
+                certURLs.append(certURL)
             }
         }
         certURLs = certURLs.sorted { $0.path < $1.path }
@@ -52,11 +52,12 @@ public class AndroidBootstrap {
         // we do this so was can safely cache the aggregate certificate file without re-creating it every time
         var urlSummary = ""
         for certURL in certURLs {
+            let attrs = try? FileManager.default.attributesOfItem(atPath: certURL.path)
             urlSummary.append(certURL.path)
             urlSummary.append("|")
-            urlSummary.append((try? certURL.resourceValues(forKeys: [.fileSizeKey]).fileSize?.description) ?? "")
+            urlSummary.append((attrs?[.size] as? Int)?.description ?? "")
             urlSummary.append("|")
-            urlSummary.append((try? certURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate?.timeIntervalSince1970.description) ?? "")
+            urlSummary.append((attrs?[.modificationDate] as? Date)?.timeIntervalSince1970.description ?? "")
             urlSummary.append("|")
         }
         let checksum = crc32Checksum(of: urlSummary.data(using: .utf8) ?? Data())
@@ -79,26 +80,22 @@ public class AndroidBootstrap {
             try FileManager.default.removeItem(atPath: generatedCacertsURL.path)
         }
 
-        _ = FileManager.default.createFile(atPath: generatedCacertsURL.path, contents: nil)
-        let fs = try FileHandle(forWritingTo: generatedCacertsURL)
-        defer { try? fs.close() }
-
-        // write a header
-        fs.write("""
-        ## Bundle of CA Root Certificates
-        ## Auto-generated on \(Date())
-        ## by aggregating certificates from: \(certsFolders)
-
-        """.data(using: .utf8)!)
-
         // Go through each folder and load each certificate file (ending with ".0"),
         // and smash them together into a single aggreagate file tha curl can load.
         // The .0 files will contain some extra metadata, but libcurl only cares about the
         // -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- sections,
         // so we can naïvely concatenate them all and libcurl will understand the bundle.
+        var pemData = Data()
+        pemData.append("""
+        ## Bundle of CA Root Certificates
+        ## Auto-generated on \(Date())
+        ## by aggregating certificates from: \(certsFolders)
+
+        """.data(using: .utf8)!)
         for certURL in certURLs {
-            try fs.write(contentsOf: try Data(contentsOf: certURL))
+            pemData.append(try Data(contentsOf: certURL))
         }
+        try pemData.write(to: generatedCacertsURL)
 
         setenv("URLSessionCertificateAuthorityInfoFile", generatedCacertsURL.path, 1)
     }

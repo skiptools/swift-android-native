@@ -1,10 +1,14 @@
 // Copyright 2025 Skip
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 #if os(Android)
 import Android
 import AndroidNDK
 #endif
 import SwiftJavaJNICore
-import Foundation
 
 /// https://developer.android.com/ndk/reference/group/asset
 //@available(macOS, unavailable)

@@ -1,8 +1,11 @@
 import Testing
 import AndroidNative
-import Foundation
-#if canImport(FoundationNetworking)
+#if canImport(FoundationEssentials)
 import FoundationEssentials
+#else
+import Foundation
+#endif
+#if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
