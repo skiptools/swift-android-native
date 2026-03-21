@@ -3,7 +3,7 @@
 import Android
 import AndroidNDK
 #endif
-import SwiftJNI
+import SwiftJavaJNICore
 import Foundation
 
 /// https://developer.android.com/ndk/reference/group/asset
@@ -16,7 +16,7 @@ public final class AndroidAssetManager : @unchecked Sendable {
     typealias AssetHandle = OpaquePointer
     
     /// Create the asset manager from the given JNI environment with a jobject pointer to the Java AssetManager.
-    public init(env: UnsafeMutablePointer<JNIEnv?>, peer: JavaObjectPointer) {
+    public init(env: UnsafeMutablePointer<JNIEnv?>, peer: jobject) {
         #if !os(Android)
         fatalError("only implemented for Android")
         #else
