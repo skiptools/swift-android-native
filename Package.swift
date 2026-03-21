@@ -67,10 +67,11 @@ let package = Package(
             "AndroidAssetManager",
         ]),
         .target(name: "AndroidLogging", dependencies: [
-            .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
+            "AndroidSystem"
         ]),
         .testTarget(name: "AndroidLoggingTests", dependencies: [
             "AndroidLogging",
+            "OSLog"
         ]),
         .target(name: "AndroidLooper", dependencies: [
             "AndroidSystem",
