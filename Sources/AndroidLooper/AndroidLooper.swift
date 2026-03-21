@@ -7,6 +7,7 @@ import AndroidLogging
 import ConcurrencyRuntimeC
 import CoreFoundation
 import Dispatch
+import OSLog
 
 let logger = Logger(subsystem: "swift.android.native", category: "AndroidLooper")
 
