@@ -108,3 +108,6 @@ build
 
 # gradle properties
 local.properties
+
+# VS Code
+.vscode

@@ -1,21 +1,48 @@
 // swift-tools-version: 5.9
 import PackageDescription
+import class Foundation.FileManager
+import class Foundation.ProcessInfo
 
 let android = Context.environment["TARGET_OS_ANDROID"] ?? "0" != "0"
 
+// Override JNI package
+let swiftJavaJNICoreDep: Package.Dependency
+if let localPath = Context.environment["SWIFT_JAVA_JNI_CORE_PATH"] {
+  swiftJavaJNICoreDep = .package(path: localPath)
+} else {
+  swiftJavaJNICoreDep = .package(url: "https://github.com/swiftlang/swift-java-jni-core", from: "0.3.0")
+}
+
+// Get NDK version from command line
+let ndkVersion = ProcessInfo.processInfo.environment["ANDROID_NDK_VERSION"].flatMap { UInt($0) } ?? 27
+let ndkVersionDefine = SwiftSetting.define("ANDROID_NDK_VERSION_" + ndkVersion.description)
+
+// Get Android API version
+let sdkVersion = ProcessInfo.processInfo.environment["ANDROID_SDK_VERSION"].flatMap { UInt($0) } ?? 28
+let sdkVersionDefine = SwiftSetting.define("ANDROID_SDK_VERSION_" + sdkVersion.description)
+
+// Conditionally enable features
+let ndkBinder = sdkVersion >= 29 // binder_ndk Requires API 29
+
 let package = Package(
     name: "swift-android-native",
-    platforms: [.iOS(.v17), .macOS(.v14), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17)],
+    platforms: [
+        .iOS(.v17),
+        .macOS(.v14),
+        .tvOS(.v17),
+        .watchOS(.v10),
+        .macCatalyst(.v17),
+        .visionOS(.v1)
+    ],
     products: [
         .library(name: "AndroidNative", targets: ["AndroidNative"]),
-        .library(name: "AndroidContext", targets: ["AndroidContext"]),
         .library(name: "AndroidAssetManager", targets: ["AndroidAssetManager"]),
         .library(name: "AndroidLogging", targets: ["AndroidLogging"]),
         .library(name: "AndroidLooper", targets: ["AndroidLooper"]),
-        .library(name: "AndroidChoreographer", targets: ["AndroidLooper"]),
+        .library(name: "AndroidChoreographer", targets: ["AndroidChoreographer"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/swift-jni.git", "0.0.0"..<"2.0.0"),
+        swiftJavaJNICoreDep
     ],
     targets: [
         .target(name: "AndroidNDK", linkerSettings: [
@@ -33,7 +60,7 @@ let package = Package(
             "AndroidSystem",
         ]),
         .target(name: "AndroidAssetManager", dependencies: [
-            .product(name: "SwiftJNI", package: "swift-jni"),
+            .product(name: "SwiftJavaJNICore", package: "swift-java-jni-core"),
             .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
         ]),
         .testTarget(name: "AndroidAssetManagerTests", dependencies: [
@@ -44,13 +71,6 @@ let package = Package(
         ]),
         .testTarget(name: "AndroidLoggingTests", dependencies: [
             "AndroidLogging",
-        ]),
-        .target(name: "AndroidContext", dependencies: [
-            "AndroidAssetManager",
-            .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
-        ]),
-        .testTarget(name: "AndroidContextTests", dependencies: [
-            "AndroidContext",
         ]),
         .target(name: "AndroidLooper", dependencies: [
             "AndroidSystem",
@@ -68,7 +88,8 @@ let package = Package(
             "AndroidChoreographer",
         ]),
         .target(name: "AndroidNative", dependencies: [
-            "AndroidContext",
+            .product(name: "SwiftJavaJNICore", package: "swift-java-jni-core"),
+            "AndroidAssetManager",
             "AndroidLogging",
             "AndroidLooper",
             "AndroidChoreographer",
