@@ -24,10 +24,10 @@ import Foundation
 @available(iOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
-public final class AndroidAssetManager : @unchecked Sendable {
+public final class AndroidAssetManager: @unchecked Sendable {
     let assetManager: OpaquePointer // AAssetManager
     typealias AssetHandle = OpaquePointer
-    
+
     /// Create the asset manager from the given JNI environment with a jobject pointer to the Java AssetManager.
     public init(env: UnsafeMutablePointer<JNIEnv?>, peer: JavaObjectPointer) {
         #if !os(Android)

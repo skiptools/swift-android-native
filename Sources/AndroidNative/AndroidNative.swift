@@ -98,12 +98,13 @@ public class AndroidBootstrap {
         defer { try? fs.close() }
 
         // write a header
-        fs.write("""
-        ## Bundle of CA Root Certificates
-        ## Auto-generated on \(Date())
-        ## by aggregating certificates from: \(certsFolders)
+        fs.write(
+            """
+            ## Bundle of CA Root Certificates
+            ## Auto-generated on \(Date())
+            ## by aggregating certificates from: \(certsFolders)
 
-        """.data(using: .utf8)!)
+            """.data(using: .utf8)!)
 
         // Go through each folder and load each certificate file (ending with ".0"),
         // and smash them together into a single aggreagate file tha curl can load.
@@ -135,4 +136,3 @@ public class AndroidBootstrap {
     }
 }
 #endif
-

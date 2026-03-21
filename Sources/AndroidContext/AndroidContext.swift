@@ -33,7 +33,7 @@ import SwiftJNI
 @available(iOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
-public class AndroidContext : JObject {
+public class AndroidContext: JObject {
     /// The JNI signature for the method to invoke to obtain the global Context.
     /// This can be manually changed before initialization to a different signature.
     /// It must be a zero-argument static fuction that returns an instance of `android.content.Context`.
@@ -98,8 +98,7 @@ public class AndroidContext : JObject {
     }
     private static let getPackageNameID = javaClass.getMethodID(name: "getPackageName", sig: "()Ljava/lang/String;")!
 
-
-    struct ContextError : LocalizedError {
+    struct ContextError: LocalizedError {
         var errorDescription: String?
     }
 }

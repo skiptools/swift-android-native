@@ -32,7 +32,7 @@ struct AndroidNativeTests {
         #endif
 
         /// https://www.swift.org/openapi/openapi.html#/Toolchains/listReleases
-        struct SwiftReleasesResponse : Decodable {
+        struct SwiftReleasesResponse: Decodable {
             var name: String
             var date: String?
             var tag: String?
@@ -81,10 +81,11 @@ struct AndroidNativeTests {
         var tasks: [Task<Int, Never>] = []
 
         for i in 0..<100 {
-            tasks.append(Task(priority: [.low, .medium, .high].randomElement()!) {
-                assert(!Thread.isMainThread)
-                return await actorDemo.add(n1: i, n2: i)
-            })
+            tasks.append(
+                Task(priority: [.low, .medium, .high].randomElement()!) {
+                    assert(!Thread.isMainThread)
+                    return await actorDemo.add(n1: i, n2: i)
+                })
         }
 
         var totalResult = 0
