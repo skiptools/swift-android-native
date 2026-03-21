@@ -36,11 +36,10 @@ let package = Package(
     ],
     products: [
         .library(name: "AndroidNative", targets: ["AndroidNative"]),
-        .library(name: "AndroidContext", targets: ["AndroidContext"]),
         .library(name: "AndroidAssetManager", targets: ["AndroidAssetManager"]),
         .library(name: "AndroidLogging", targets: ["AndroidLogging"]),
         .library(name: "AndroidLooper", targets: ["AndroidLooper"]),
-        .library(name: "AndroidChoreographer", targets: ["AndroidLooper"]),
+        .library(name: "AndroidChoreographer", targets: ["AndroidChoreographer"]),
     ],
     dependencies: [
         swiftJavaJNICoreDep
@@ -89,7 +88,6 @@ let package = Package(
             "AndroidChoreographer",
         ]),
         .target(name: "AndroidNative", dependencies: [
-            "AndroidContext",
             "AndroidLogging",
             "AndroidLooper",
             "AndroidChoreographer",
