@@ -1,0 +1,11 @@
+version: 1
+metadata:
+  authors: 'Skip.dev and SwiftAndroidNative project authors'
+builder:
+  configs:
+    - documentation_targets:
+      - 'AndroidContext'
+      - 'AndroidAssetManager'
+      - 'AndroidLogging'
+      - 'AndroidLooper'
+      - 'AndroidChoreographer'

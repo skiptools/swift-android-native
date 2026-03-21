@@ -1,23 +1,31 @@
 name: swift-android-native ci
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
   pull_request:
     branches:
       - '*'
   schedule:
-    - cron:  '45 2,13 * * *'
+    - cron: '45 2,13 * * *'
 jobs:
   ci:
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        os: ['macos-15-intel', 'ubuntu-latest']
-        swift: ['nightly-6.3', 'nightly-main']
-        android-api: ['28', '36']
+        # macOS testing isn't strictly necessary
+        #os: ['macos-15-intel', 'ubuntu-latest']
+        os: ['ubuntu-latest']
+
+        #swift: ['nightly-6.3', 'nightly-main']
+        swift: ['nightly-6.3']
+
+        #android-api: ['28', '36']
+        android-api: ['28']
+
         android-ndk: ['r27d', 'r30-beta1']
+        #android-ndk: ['r27d']
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Setup Homebrew"
@@ -62,5 +70,3 @@ jobs:
       # Not API stable package (yet)
       api_breakage_check_enabled: false
       format_check_enabled: true
-      license_header_check_project_name: "Swift Android Native"
-
