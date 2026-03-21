@@ -70,8 +70,7 @@ let package = Package(
             "AndroidSystem"
         ]),
         .testTarget(name: "AndroidLoggingTests", dependencies: [
-            "AndroidLogging",
-            "OSLog"
+            "AndroidLogging"
         ]),
         .target(name: "AndroidLooper", dependencies: [
             "AndroidSystem",
@@ -105,5 +104,6 @@ let package = Package(
 if android {
     // add compatibility import from OSLog to AndroidLogging
     package.targets += [.target(name: "OSLog", dependencies: ["AndroidLogging"])]
+    package.targets.first(where: { $0.name == "AndroidLoggingTests" })?.dependencies += [.target(name: "OSLog")]
 }
 
