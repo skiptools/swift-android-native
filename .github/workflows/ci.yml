@@ -15,17 +15,17 @@ jobs:
       fail-fast: false
       matrix:
         # macOS testing isn't strictly necessary
-        #os: ['macos-15-intel', 'ubuntu-latest']
+        # os: ['macos-15-intel', 'ubuntu-latest']
         os: ['ubuntu-latest']
 
-        #swift: ['nightly-6.3', 'nightly-main']
+        # swift: ['nightly-6.3', 'nightly-main']
         swift: ['nightly-6.3']
 
-        #android-api: ['28', '36']
+        # android-api: ['28', '36']
         android-api: ['28']
 
         android-ndk: ['r27d', 'r30-beta1']
-        #android-ndk: ['r27d']
+        # android-ndk: ['r27d']
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Setup Homebrew"

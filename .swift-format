@@ -1,20 +1,25 @@
 {
-    "fileScopedDeclarationPrivacy": {
-        "accessLevel": "private"
-    },
-    "indentConditionalCompilationBlocks": false,
-    "indentSwitchCaseLabels": false,
+    "version": 1,
+    "excluded": [
+        "Sources/AndroidSystem/**"
+    ],
+    "tabWidth": 4,
     "indentation": {
         "spaces": 4
     },
+    "maximumBlankLines": 1,
+    "indentConditionalCompilationBlocks": false,
+    "indentSwitchCaseLabels": false,
     "lineBreakAroundMultilineExpressionChainComponents": false,
     "lineBreakBeforeControlFlowKeywords": false,
     "lineBreakBeforeEachArgument": false,
     "lineBreakBeforeEachGenericRequirement": false,
     "lineBreakBetweenDeclarationAttributes": false,
     "lineLength": 9999,
-    "maximumBlankLines": 1,
     "multiElementCollectionTrailingCommas": true,
+    "fileScopedDeclarationPrivacy": {
+        "accessLevel": "private"
+    },
     "noAssignmentInExpressions": {
         "allowedFunctions": [
             "XCTAssertNoThrow"
@@ -22,6 +27,8 @@
     },
     "prioritizeKeepingFunctionOutputTogether": false,
     "respectsExistingLineBreaks": true,
+    "spacesAroundRangeFormationOperators": false,
+    "spacesBeforeEndOfLineComments": 1,
     "rules": {
         "AllPublicDeclarationsHaveDocumentation": false,
         "AlwaysUseLiteralForEmptyCollectionInit": false,
@@ -66,9 +73,5 @@
         "UseTripleSlashForDocumentationComments": false,
         "UseWhereClausesInForLoops": false,
         "ValidateDocumentationComments": false
-    },
-    "spacesAroundRangeFormationOperators": false,
-    "spacesBeforeEndOfLineComments": 1,
-    "tabWidth": 4,
-    "version": 1
+    }
 }
