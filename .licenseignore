@@ -2,6 +2,7 @@
 **/.gitignore
 .licenseignore
 .unacceptablelanguageignore
+.swiftformatignore
 .gitattributes
 .mailfilter
 .mailmap
@@ -38,3 +39,4 @@ dev/git.commit.template
 **/*.pem
 *.der
 **/*.der
+Sources/ConcurrencyRuntimeC/include/include.h
