@@ -56,4 +56,11 @@ jobs:
       - name: "Test Swift Package on iOS"
         if: runner.os == 'macOS'
         run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 17" -scheme swift-android-native-Package
+  soundness:
+    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main
+    with:
+      # Not API stable package (yet)
+      api_breakage_check_enabled: false
+      format_check_enabled: true
+      license_header_check_project_name: "Swift Android Native"
 
