@@ -88,6 +88,8 @@ let package = Package(
             "AndroidChoreographer",
         ]),
         .target(name: "AndroidNative", dependencies: [
+            .product(name: "SwiftJavaJNICore", package: "swift-java-jni-core"),
+            "AndroidAssetManager",
             "AndroidLogging",
             "AndroidLooper",
             "AndroidChoreographer",
