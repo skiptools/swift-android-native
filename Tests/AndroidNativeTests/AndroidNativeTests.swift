@@ -2,7 +2,6 @@ import Testing
 import AndroidNative
 import Foundation
 #if canImport(FoundationNetworking)
-import FoundationEssentials
 import FoundationNetworking
 #endif
 
@@ -59,6 +58,7 @@ struct AndroidNativeTests {
         #expect(String(data: Data(PackageResources.sample_resource_txt), encoding: .utf8) == "Hello Android!\n")
     }
 
+    #if canImport(Foundation)
     @Test(.disabled("temporarily disabled on Android due to hang"))
     func testMainActor() async {
         let actorDemo = await MainActorDemo()
@@ -81,8 +81,10 @@ struct AndroidNativeTests {
 
         #expect(totalResult == 9900)
     }
+    #endif
 }
 
+#if canImport(Foundation)
 @MainActor class MainActorDemo {
     init() {
     }
@@ -92,3 +94,4 @@ struct AndroidNativeTests {
         return n1 + n2
     }
 }
+#endif

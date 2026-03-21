@@ -67,10 +67,10 @@ let package = Package(
             "AndroidAssetManager",
         ]),
         .target(name: "AndroidLogging", dependencies: [
-            .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
+            "AndroidSystem"
         ]),
         .testTarget(name: "AndroidLoggingTests", dependencies: [
-            "AndroidLogging",
+            "AndroidLogging"
         ]),
         .target(name: "AndroidLooper", dependencies: [
             "AndroidSystem",
@@ -104,5 +104,6 @@ let package = Package(
 if android {
     // add compatibility import from OSLog to AndroidLogging
     package.targets += [.target(name: "OSLog", dependencies: ["AndroidLogging"])]
+    package.targets.first(where: { $0.name == "AndroidLoggingTests" })?.dependencies += [.target(name: "OSLog")]
 }
 

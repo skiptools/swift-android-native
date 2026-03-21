@@ -1,5 +1,5 @@
 import Testing
-import AndroidLogging // note: on non-android platforms, this will just export the system OSLog
+import OSLog // note: on non-android platforms, this will just export the system OSLog
 
 struct AndroidLoggingTests {
     @Test func testOSLogAPI() {

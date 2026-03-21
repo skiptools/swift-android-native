@@ -8,8 +8,6 @@ import ConcurrencyRuntimeC
 import CoreFoundation
 import Dispatch
 
-let logger = Logger(subsystem: "swift.android.native", category: "AndroidLooper")
-
 // Much of this is adapted from https://github.com/PADL/AndroidLooper/blob/0f26e1bdb989120f5689d74ea69a0525833ecd52/Sources/AndroidLooper/ALooper.swift
 
 /// https://developer.android.com/ndk/reference/group/looper
@@ -51,7 +49,6 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
 
     // Called from applicaton entry point
     public static func setupMainLooper() -> Bool {
-        logger.debug("setupMainLooper")
         if _mainLooper != nil {
             ALooper_release(_mainLooper)
             _mainLooper = nil
@@ -60,7 +57,6 @@ public struct AndroidLooper: ~Copyable, @unchecked Sendable {
         _mainLooper = ALooper_forThread()
         if _mainLooper == nil {
             // this happens sometimes when running in test cases, perhaps because setup is not being called from the main thread
-            logger.debug("setupMainLooper: ALooper_forThread: no looper found for thread")
             return false
         }
         ALooper_acquire(_mainLooper)
