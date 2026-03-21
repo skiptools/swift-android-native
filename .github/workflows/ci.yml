@@ -70,3 +70,4 @@ jobs:
       # Not API stable package (yet)
       api_breakage_check_enabled: false
       format_check_enabled: true
+      docs_check_enabled: true
