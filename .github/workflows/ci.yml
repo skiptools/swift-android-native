@@ -17,7 +17,7 @@ jobs:
         os: ['macos-15-intel', 'ubuntu-latest']
         swift: ['nightly-6.3', 'nightly-main']
         android-api: ['28', '36']
-        android-ndk: ['27d', '30-beta1']
+        android-ndk: ['r27d', 'r30-beta1']
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Setup Homebrew"
