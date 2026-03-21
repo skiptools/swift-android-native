@@ -7,10 +7,13 @@ import AndroidNDK
 #if canImport(os)
 @_exported import OSLog
 #else
+import AndroidLogging
+
 public typealias OSLogMessage = String
 
 /// https://developer.android.com/ndk/reference/group/logging
-public struct Logger : @unchecked Sendable {
+public struct Logger : Sendable {
+
     public let subsystem: String
     public let category: String
 
@@ -27,111 +30,52 @@ public struct Logger : @unchecked Sendable {
     }
 
     public func log(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_INFO, message: message)
-        #else
-        print("\(logTag) log: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .info).log(message)
     }
 
     public func trace(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_VERBOSE, message: message)
-        #else
-        print("\(logTag) trace: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .verbose).log(message)
     }
 
     public func debug(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_DEBUG, message: message)
-        #else
-        print("\(logTag) debug: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .debug).log(message)
     }
 
     public func info(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_INFO, message: message)
-        #else
-        print("\(logTag) info: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .info).log(message)
     }
 
     public func notice(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_INFO, message: message)
-        #else
-        print("\(logTag) notice: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .info).log(message)
     }
 
     public func warning(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_WARN, message: message)
-        #else
-        print("\(logTag) warning: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .warning).log(message)
     }
 
     public func error(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_ERROR, message: message)
-        #else
-        print("\(logTag) error: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .error).log(message)
     }
 
     public func critical(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_ERROR, message: message)
-        #else
-        print("\(logTag) critical: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .error).log(message)
     }
 
     public func fault(_ message: OSLogMessage) {
-        #if os(Android)
-        androidLog(priority: ANDROID_LOG_FATAL, message: message)
-        #else
-        print("\(logTag) fault: \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .fatal).log(message)
     }
 
     public func log(level type: OSLogType, _ message: OSLogMessage) {
-        #if os(Android)
-        let priority: android_LogPriority
-        switch type {
-        case .info: priority = ANDROID_LOG_INFO
-        case .debug: priority = ANDROID_LOG_DEBUG
-        case .error: priority = ANDROID_LOG_ERROR
-        case .fault: priority = ANDROID_LOG_FATAL
-        default: priority = ANDROID_LOG_DEFAULT
-        }
-
-        androidLog(priority: priority, message: message)
-        #else
-        print("\(logTag) log \(type): \(message)")
-        #endif
+        try? AndroidLogger(tag: tag, priority: .init(type)).log(message)
     }
 
-    private var logTag: String {
-        subsystem.isEmpty && category.isEmpty ? "" : (subsystem + "/" + category)
+    private var tag: LogTag {
+        LogTag(rawValue: subsystem.isEmpty && category.isEmpty ? "" : (subsystem + "/" + category))
     }
-
-    #if os(Android)
-    private func androidLog(priority: android_LogPriority, message: OSLogMessage) {
-        //swift_android_log(priority, logTag, messagePtr)
-        __android_log_write(Int32(priority.rawValue), logTag, message)
-    }
-    #endif
 }
 
-//extension OSLog.Category {
-//    public static let dynamicTracing: OSLog.Category
-//    public static let dynamicStackTracing: OSLog.Category
-//}
-public struct OSLogType : Equatable, RawRepresentable {
+public struct OSLogType: Equatable, Hashable, RawRepresentable, Sendable {
+
     public let rawValue: UInt8
 
     public init(_ rawValue: UInt8) {
@@ -144,10 +88,29 @@ public struct OSLogType : Equatable, RawRepresentable {
 }
 
 extension OSLogType {
-    public static let `default`: OSLogType = OSLogType(0x00)
-    public static let info: OSLogType = OSLogType(0x01)
-    public static let debug: OSLogType = OSLogType(0x02)
-    public static let error: OSLogType = OSLogType(0x10)
-    public static let fault: OSLogType = OSLogType(0x11)
+    public static var `default`: OSLogType  { OSLogType(0x00) }
+    public static var info: OSLogType       { OSLogType(0x01) }
+    public static var debug: OSLogType      { OSLogType(0x02) }
+    public static var error: OSLogType      { OSLogType(0x10) }
+    public static var fault: OSLogType      { OSLogType(0x11) }
 }
+
+internal extension LogPriority {
+
+    init(_ type: OSLogType) {
+        switch type {
+        case .info:
+            self = .info
+        case .debug:
+            self = .debug
+        case .error:
+            self = .error
+        case .fault:
+            self = .fatal
+        default:
+            self = .default
+        }
+    }
+}
+
 #endif
