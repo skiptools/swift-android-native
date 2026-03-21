@@ -1,4 +1,17 @@
-// Copyright 2025 Skip
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftAndroidNative open source project
+//
+// Copyright (c) 2024-2026 Skip.dev and SwiftAndroidNative project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftAndroidNative project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
 @_exported import SwiftJNI
 @_exported import AndroidAssetManager
 @_exported import AndroidLogging
@@ -85,12 +98,13 @@ public class AndroidBootstrap {
         defer { try? fs.close() }
 
         // write a header
-        fs.write("""
-        ## Bundle of CA Root Certificates
-        ## Auto-generated on \(Date())
-        ## by aggregating certificates from: \(certsFolders)
+        fs.write(
+            """
+            ## Bundle of CA Root Certificates
+            ## Auto-generated on \(Date())
+            ## by aggregating certificates from: \(certsFolders)
 
-        """.data(using: .utf8)!)
+            """.data(using: .utf8)!)
 
         // Go through each folder and load each certificate file (ending with ".0"),
         // and smash them together into a single aggreagate file tha curl can load.
@@ -122,4 +136,3 @@ public class AndroidBootstrap {
     }
 }
 #endif
-

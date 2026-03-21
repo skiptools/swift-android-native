@@ -1,4 +1,17 @@
-// Copyright 2025 Skip
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftAndroidNative open source project
+//
+// Copyright (c) 2024-2026 Skip.dev and SwiftAndroidNative project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftAndroidNative project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -20,7 +33,7 @@ import SwiftJNI
 @available(iOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
-public class AndroidContext : JObject, @unchecked Sendable {
+public class AndroidContext: JObject, @unchecked Sendable {
     /// The JNI signature for the method to invoke to obtain the global Context.
     /// This can be manually changed before initialization to a different signature.
     /// It must be a zero-argument static fuction that returns an instance of `android.content.Context`.
@@ -85,8 +98,7 @@ public class AndroidContext : JObject, @unchecked Sendable {
     }
     private static let getPackageNameID = javaClass.getMethodID(name: "getPackageName", sig: "()Ljava/lang/String;")!
 
-
-    struct ContextError : LocalizedError {
+    struct ContextError: LocalizedError {
         var errorDescription: String?
     }
 }

@@ -1,4 +1,17 @@
-// Copyright 2025 Skip
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftAndroidNative open source project
+//
+// Copyright (c) 2024-2026 Skip.dev and SwiftAndroidNative project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftAndroidNative project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
 #if os(Android)
 import Android
 import AndroidNDK
@@ -10,7 +23,7 @@ import AndroidNDK
 public typealias OSLogMessage = String
 
 /// https://developer.android.com/ndk/reference/group/logging
-public struct Logger : @unchecked Sendable {
+public struct Logger: @unchecked Sendable {
     public let subsystem: String
     public let category: String
 
@@ -131,7 +144,7 @@ public struct Logger : @unchecked Sendable {
 //    public static let dynamicTracing: OSLog.Category
 //    public static let dynamicStackTracing: OSLog.Category
 //}
-public struct OSLogType : Equatable, RawRepresentable {
+public struct OSLogType: Equatable, RawRepresentable {
     public let rawValue: UInt8
 
     public init(_ rawValue: UInt8) {

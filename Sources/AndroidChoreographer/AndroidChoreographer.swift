@@ -1,4 +1,17 @@
-// Copyright 2025 Skip
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftAndroidNative open source project
+//
+// Copyright (c) 2024-2026 Skip.dev and SwiftAndroidNative project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftAndroidNative project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
 #if os(Android)
 import Android
 import AndroidNDK
@@ -13,7 +26,7 @@ import CoreFoundation
 @available(iOS, unavailable)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
-public final class AndroidChoreographer : @unchecked Sendable {
+public final class AndroidChoreographer: @unchecked Sendable {
     private let _choreographer: OpaquePointer
 
     /// Get the AChoreographer instance for the main thread.
@@ -45,7 +58,7 @@ public final class AndroidChoreographer : @unchecked Sendable {
         }
     }
 
-    public func postFrameCallback(_ callback: @convention(c)(Int, UnsafeMutableRawPointer?) -> ()) {
+    public func postFrameCallback(_ callback: @convention(c) (Int, UnsafeMutableRawPointer?) -> ()) {
         #if !os(Android)
         fatalError("only implemented for Android")
         #else
