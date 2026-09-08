@@ -28,7 +28,7 @@ let package = Package(
         .library(name: "AndroidChoreographer", targets: ["AndroidLooper"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/swift-jni.git", "0.0.0"..<"2.0.0")
+        .package(url: "https://github.com/skiptools/swift-jni.git", "0.0.0"..<"2.0.0")
     ],
     targets: [
         .target(
