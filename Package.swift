@@ -47,6 +47,13 @@ let package = Package(
                 .define("SYSTEM_PACKAGE_DARWIN", .when(platforms: [.macOS, .macCatalyst, .iOS, .watchOS, .tvOS, .visionOS])),
                 .define("SYSTEM_PACKAGE"),
             ]),
+        // keep first: `skip android test --apk` only runs the first test target, and this one needs the APK's JVM and Context
+        .testTarget(
+            name: "AndroidAssetManagerTests",
+            dependencies: [
+                "AndroidAssetManager",
+                "AndroidContext",
+            ]),
         .testTarget(
             name: "AndroidSystemTests",
             dependencies: [
@@ -57,12 +64,6 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftJNI", package: "swift-jni"),
                 .target(name: "AndroidNDK", condition: .when(platforms: [.android])),
-            ]),
-        .testTarget(
-            name: "AndroidAssetManagerTests",
-            dependencies: [
-                "AndroidAssetManager",
-                "AndroidContext",
             ]),
         .target(
             name: "AndroidLogging",
