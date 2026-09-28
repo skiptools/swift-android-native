@@ -26,6 +26,9 @@ import Foundation
 @available(watchOS, unavailable)
 public final class AndroidAssetManager: @unchecked Sendable {
     let assetManager: OpaquePointer // AAssetManager
+    /// Global reference to the Java AssetManager, which owns `assetManager`: if it were garbage collected
+    /// (e.g. after the app's Resources are redirected to a new AssetManager), `assetManager` would dangle
+    let peer: JObject
     typealias AssetHandle = OpaquePointer
 
     /// Create the asset manager from the given JNI environment with a jobject pointer to the Java AssetManager.
@@ -33,6 +36,7 @@ public final class AndroidAssetManager: @unchecked Sendable {
         #if !os(Android)
         fatalError("only implemented for Android")
         #else
+        self.peer = JObject(peer)
         self.assetManager = AAssetManager_fromJava(env, peer)
         #endif
     }
