@@ -61,7 +61,8 @@ let package = Package(
         .testTarget(
             name: "AndroidAssetManagerTests",
             dependencies: [
-                "AndroidAssetManager"
+                "AndroidAssetManager",
+                "AndroidContext",
             ]),
         .target(
             name: "AndroidLogging",
