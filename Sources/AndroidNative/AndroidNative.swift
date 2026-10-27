@@ -27,6 +27,8 @@ import Foundation
 public class AndroidBootstrap {
     /// Collects all the certificate files from the Android certificate store and writes them to a single `cacerts.pem` file that can be used by libcurl,
     /// which is communicated through the `URLSessionCertificateAuthorityInfoFile` environment property
+    /// The aggregate is written atomically.
+    /// An existing aggregate is reused only when it is at least as large as the sum of the system certificate files.
     ///
     /// See https://android.googlesource.com/platform/frameworks/base/+/8b192b19f264a8829eac2cfaf0b73f6fc188d933%5E%21/#F0
     /// See https://github.com/apple/swift-nio-ssl/blob/d1088ebe0789d9eea231b40741831f37ab654b61/Sources/NIOSSL/AndroidCABundle.swift#L30
@@ -65,10 +67,13 @@ public class AndroidBootstrap {
         // generate a checksum of all the certificate URL names and their sizes and modification times in order to define the aggregate file name
         // we do this so was can safely cache the aggregate certificate file without re-creating it every time
         var urlSummary = ""
+        var expectedMinimumBytes: Int = 0
         for certURL in certURLs {
+            let fileSize = try? certURL.resourceValues(forKeys: [.fileSizeKey]).fileSize
+            expectedMinimumBytes += fileSize ?? 0
             urlSummary.append(certURL.path)
             urlSummary.append("|")
-            urlSummary.append((try? certURL.resourceValues(forKeys: [.fileSizeKey]).fileSize?.description) ?? "")
+            urlSummary.append(fileSize?.description ?? "")
             urlSummary.append("|")
             urlSummary.append((try? certURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate?.timeIntervalSince1970.description) ?? "")
             urlSummary.append("|")
@@ -83,22 +88,29 @@ public class AndroidBootstrap {
         let generatedCacertsURL = cacheFolder.appendingPathComponent("cacerts-aggregate-\(checksum).pem")
 
         if FileManager.default.fileExists(atPath: generatedCacertsURL.path) {
-            // cached aggregate file already exists; just re-use
+            // re-use only a non-empty cached aggregate file of sufficient size
             if !force {
-                setenv("URLSessionCertificateAuthorityInfoFile", generatedCacertsURL.path, 1)
-                return
+                let size = (try? FileManager.default.attributesOfItem(atPath: generatedCacertsURL.path)[.size] as? NSNumber)?.intValue ?? 0
+                if size > 0 && size >= expectedMinimumBytes {
+                    setenv("URLSessionCertificateAuthorityInfoFile", generatedCacertsURL.path, 1)
+                    return
+                }
             }
 
             // clear any previous generated certificates file that may have been created by this app
             try FileManager.default.removeItem(atPath: generatedCacertsURL.path)
         }
 
-        _ = FileManager.default.createFile(atPath: generatedCacertsURL.path, contents: nil)
-        let fs = try FileHandle(forWritingTo: generatedCacertsURL)
+        let tempPath = generatedCacertsURL.path + ".\(UUID().uuidString).tmp"
+        defer { try? FileManager.default.removeItem(atPath: tempPath) }
+        guard FileManager.default.createFile(atPath: tempPath, contents: nil) else {
+            throw CocoaError(.fileWriteUnknown)
+        }
+        let fs = try FileHandle(forWritingTo: URL(fileURLWithPath: tempPath))
         defer { try? fs.close() }
 
         // write a header
-        fs.write(
+        try fs.write(contentsOf:
             """
             ## Bundle of CA Root Certificates
             ## Auto-generated on \(Date())
@@ -113,6 +125,12 @@ public class AndroidBootstrap {
         // so we can naïvely concatenate them all and libcurl will understand the bundle.
         for certURL in certURLs {
             try fs.write(contentsOf: try Data(contentsOf: certURL))
+        }
+
+        try fs.synchronize()
+        try fs.close()
+        guard rename(tempPath, generatedCacertsURL.path) == 0 else {
+            throw CocoaError(.fileWriteUnknown)
         }
 
         setenv("URLSessionCertificateAuthorityInfoFile", generatedCacertsURL.path, 1)

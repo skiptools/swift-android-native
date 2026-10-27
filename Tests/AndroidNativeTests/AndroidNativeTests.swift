@@ -15,6 +15,9 @@
 import Testing
 import AndroidNative
 import Foundation
+#if os(Android)
+import Android
+#endif
 #if canImport(FoundationNetworking)
 import FoundationEssentials
 import FoundationNetworking
@@ -25,6 +28,102 @@ private struct RetryableError: Error {
 }
 
 struct AndroidNativeTests {
+    #if os(Android)
+    private static let caCertsLock = NSLock()
+
+    @Test func testSetupCACertsBuildsCompleteBundle() throws {
+        try withCACertsFixture { _, expectedMinimumBytes, aggregateURL in
+            #expect(FileManager.default.fileExists(atPath: aggregateURL.path))
+            try expectCompleteCACerts(at: aggregateURL, expectedMinimumBytes: expectedMinimumBytes)
+        }
+    }
+
+    @Test func testSetupCACertsRebuildsEmptyBundle() throws {
+        try withCACertsFixture { certsFolder, expectedMinimumBytes, aggregateURL in
+            try Data().write(to: aggregateURL)
+            unsetenv("URLSessionCertificateAuthorityInfoFile")
+            try AndroidBootstrap.setupCACerts(force: false, fromCertficateFolders: [certsFolder.path])
+            let path = try #require(getenv("URLSessionCertificateAuthorityInfoFile"))
+            #expect(String(cString: path) == aggregateURL.path)
+            try expectCompleteCACerts(at: aggregateURL, expectedMinimumBytes: expectedMinimumBytes)
+        }
+    }
+
+    @Test func testSetupCACertsRebuildsTruncatedBundle() throws {
+        try withCACertsFixture { certsFolder, expectedMinimumBytes, aggregateURL in
+            let completeBundle = try Data(contentsOf: aggregateURL)
+            // Retain only 1 or 100 bytes, both below the certificate-size minimum.
+            for truncatedSize in [1, 100] {
+                try completeBundle.prefix(truncatedSize).write(to: aggregateURL)
+                unsetenv("URLSessionCertificateAuthorityInfoFile")
+                try AndroidBootstrap.setupCACerts(force: false, fromCertficateFolders: [certsFolder.path])
+                let path = try #require(getenv("URLSessionCertificateAuthorityInfoFile"))
+                #expect(String(cString: path) == aggregateURL.path)
+                try expectCompleteCACerts(at: aggregateURL, expectedMinimumBytes: expectedMinimumBytes)
+            }
+
+            let attributes = try FileManager.default.attributesOfItem(atPath: aggregateURL.path)
+            let size = (try #require(attributes[.size] as? NSNumber)).intValue
+            let modificationDate = try #require(attributes[.modificationDate] as? Date)
+            unsetenv("URLSessionCertificateAuthorityInfoFile")
+            try AndroidBootstrap.setupCACerts(force: false, fromCertficateFolders: [certsFolder.path])
+            let path = try #require(getenv("URLSessionCertificateAuthorityInfoFile"))
+            #expect(String(cString: path) == aggregateURL.path)
+            let reusedAttributes = try FileManager.default.attributesOfItem(atPath: aggregateURL.path)
+            #expect((reusedAttributes[.size] as? NSNumber)?.intValue == size)
+            #expect(reusedAttributes[.modificationDate] as? Date == modificationDate)
+        }
+    }
+
+    private func withCACertsFixture(_ body: (URL, Int, URL) throws -> Void) throws {
+        // These tests share a process-wide environment variable.
+        Self.caCertsLock.lock()
+        defer { Self.caCertsLock.unlock() }
+        let previousPath = getenv("URLSessionCertificateAuthorityInfoFile").map { String(cString: $0) }
+        defer {
+            if let previousPath {
+                setenv("URLSessionCertificateAuthorityInfoFile", previousPath, 1)
+            } else {
+                unsetenv("URLSessionCertificateAuthorityInfoFile")
+            }
+        }
+
+        let certsFolder = URL.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: certsFolder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: certsFolder) }
+        var expectedMinimumBytes = 0
+        for name in ["aaaaaaaa.0", "bbbbbbbb.0", "cccccccc.0", "dddddddd.0"] {
+            let certificate = """
+            -----BEGIN CERTIFICATE-----
+            YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=
+            MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3A=
+            cXJzdHV2d3h5ejAxMjM0NTY3ODlhYmNkZWY=
+            -----END CERTIFICATE-----
+            Test certificate metadata for \(name)
+
+            """.data(using: .utf8)!
+            expectedMinimumBytes += certificate.count
+            try certificate.write(to: certsFolder.appendingPathComponent(name))
+        }
+
+        unsetenv("URLSessionCertificateAuthorityInfoFile")
+        try AndroidBootstrap.setupCACerts(force: false, fromCertficateFolders: [certsFolder.path])
+        let path = try #require(getenv("URLSessionCertificateAuthorityInfoFile"))
+        let aggregateURL = URL(fileURLWithPath: String(cString: path))
+        defer { try? FileManager.default.removeItem(at: aggregateURL) }
+        try body(certsFolder, expectedMinimumBytes, aggregateURL)
+    }
+
+    private func expectCompleteCACerts(at aggregateURL: URL, expectedMinimumBytes: Int) throws {
+        let bundle = try Data(contentsOf: aggregateURL)
+        #expect(bundle.count >= expectedMinimumBytes)
+        let text = try #require(String(data: bundle, encoding: .utf8))
+        #expect(text.components(separatedBy: "-----BEGIN CERTIFICATE-----").count - 1 == 4)
+        let files = try FileManager.default.contentsOfDirectory(atPath: aggregateURL.deletingLastPathComponent().path)
+        #expect(!files.contains { $0.hasSuffix(".tmp") })
+    }
+    #endif
+
     @Test(.disabled("temporarily disabled on Android due to hang"))
     func testNetwork() async throws {
         #if os(Android)
